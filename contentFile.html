@@ -82,13 +82,13 @@
                 </div>
 
                 <button id="btn-top-upload" onclick="openUploadView()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-yellow rounded-lg text-[14px] font-semibold text-gray-900 hover:bg-brand-yellowHover transition-all shadow-sm">
-                    Upload Files
+                    <i class="fi fi-rr-upload text-[12px]"></i> Upload Files
                 </button>
             </div>
         </div>
 
         <!-- WORK AREA -->
-        <div class="w-full flex-1 flex flex-col relative">
+        <div class="w-full flex-1 flex flex-col relative min-h-0">
 
             <!-- ============================== -->
             <!-- LIST & GRID VIEW AREA          -->
@@ -138,55 +138,70 @@
             <!-- ============================== -->
             <!-- UPLOAD VIEW AREA               -->
             <!-- ============================== -->
-            <div id="upload-view-container" style="display: none;" class="w-full flex-1 flex-col items-center justify-center py-6 sm:py-8">
+            <div id="upload-view-container" style="display: none;" class="w-full flex-1 flex-col overflow-y-auto custom-scrollbar">
                 
-                <!-- Improved Header ensuring bounds and perfectly centered layout regardless of mobile screen -->
-                <div class="w-full max-w-3xl flex items-center justify-between mb-8 mx-auto px-4">
-                    <button onclick="closeUploadView()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors shrink-0">
-                        <i class="fi fi-rr-arrow-left text-[16px]"></i>
-                    </button>
-                    <div class="text-center flex-1 px-4">
-                        <h2 class="text-[20px] font-bold text-gray-900 mb-1">Upload Files</h2>
-                        <p class="text-[13px] text-gray-500">Drag and drop files here or click to browse from your device</p>
-                    </div>
-                    <div class="w-8 shrink-0"></div> <!-- Safe spacer area for centering -->
-                </div>
-
-                <!-- Fixed padding limits so this element scales safely -->
-                <div id="upload-box" class="w-full max-w-3xl mx-auto border border-dashed border-gray-300 rounded-2xl p-6 sm:p-10 bg-white flex flex-col items-center transition-all relative">
-                    
-                    <input type="file" id="fileInput" class="hidden" multiple onchange="handleFileSelect(event)">
-                    
-                    <div class="text-gray-600 mb-5"><i class="fi fi-rr-cloud-upload-alt text-[40px]"></i></div>
-                    
-                    <button onclick="document.getElementById('fileInput').click()" class="flex items-center justify-center gap-2 px-8 py-2.5 bg-brand-yellow rounded-lg text-[14px] font-bold text-gray-900 border-[1.5px] border-gray-900 hover:bg-brand-yellowHover hover:shadow-md transition-all mb-4">
-                        <i class="fi fi-rr-plus text-[12px]"></i> Choose Files
-                    </button>
-                    
-                    <p class="text-[13px] text-gray-400 font-medium text-center">or drag and drop files anywhere in this area</p>
-
-                    <div id="selected-files-section" class="hidden w-full mt-10 pt-6 border-t border-gray-100">
-                        <h4 class="text-[14px] font-bold text-gray-800 mb-4" id="selected-count-text">Selected Files (0)</h4>
+                <div class="flex flex-col min-h-full w-full justify-center items-center py-8 sm:py-12">
+                    <div class="w-full max-w-[600px] px-4 flex flex-col items-center">
                         
-                        <div id="selected-files-list" class="max-h-[250px] overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-2">
-                            <!-- JS Injected Files -->
-                        </div>
-
-                        <div class="flex justify-end items-center gap-4 mt-6 pt-5 border-t border-gray-100">
-                            <button onclick="clearSelectedFiles()" class="text-[13px] font-bold text-gray-500 hover:text-gray-800 px-3 py-2 transition-all">Clear All</button>
-                            <button onclick="startCloudinaryUpload()" id="start-upload-btn" class="flex items-center gap-2 px-6 py-2.5 bg-brand-yellow rounded-lg text-[13px] font-bold text-gray-900 border-[1.5px] border-transparent hover:border-gray-900 transition-all shadow-sm">
-                                <i class="fi fi-rr-upload text-[12px]"></i> <span id="upload-btn-text">Upload Files</span>
+                        <!-- Header Area -->
+                        <div class="relative flex items-center justify-center w-full mb-6">
+                            <button onclick="closeUploadView()" class="absolute left-0 top-1/2 -translate-y-[60%] w-8 h-8 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors shrink-0">
+                                <i class="fi fi-rr-arrow-left text-[15px]"></i>
                             </button>
-                        </div>
-
-                        <div id="upload-progress-section" class="hidden w-full mt-6 flex flex-col items-center">
-                            <span class="text-[13px] font-semibold text-gray-700 mb-2">Uploading files... <span id="upload-percent-text" class="text-brand-blue">0%</span></span>
-                            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div id="upload-progress-bar" class="h-full bg-brand-blue transition-all duration-200" style="width: 0%"></div>
+                            <div class="text-center px-10">
+                                <h2 class="text-[18px] font-bold text-gray-900 mb-1">Upload Files</h2>
+                                <p class="text-[13px] text-gray-500">Drag and drop files here or click to browse from your device</p>
                             </div>
                         </div>
+
+                        <!-- UNIFIED DASHED SECTION -->
+                        <div id="upload-box" onclick="if(event.target.id === 'upload-box' || event.target.closest('#upload-top-area')) document.getElementById('fileInput').click()" class="w-full border border-dashed border-gray-300 rounded-2xl bg-white flex flex-col transition-all relative cursor-pointer hover:bg-gray-50/50">
+                            <input type="file" id="fileInput" class="hidden" multiple onchange="handleFileSelect(event)">
+                            
+                            <!-- Top Drag Area -->
+                            <div id="upload-top-area" class="p-8 sm:p-12 flex flex-col items-center pointer-events-none transition-all">
+                                <div class="text-gray-600 mb-5"><i class="fi fi-rr-cloud-upload text-[42px]"></i></div>
+                                
+                                <button class="pointer-events-auto flex items-center justify-center gap-2 px-6 py-2 bg-brand-yellow rounded-full text-[13px] font-bold text-gray-900 hover:bg-brand-yellowHover transition-all mb-4 shadow-sm" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                                    <i class="fi fi-rr-plus text-[12px]"></i> Choose Files
+                                </button>
+                                
+                                <p class="text-[12px] text-gray-400 font-medium text-center">or drag and drop files anywhere in this area</p>
+                            </div>
+
+                            <!-- Selected Files Section (Inside Dashed Box) -->
+                            <div id="selected-files-section" class="hidden w-full px-6 pb-6 cursor-default" onclick="event.stopPropagation()">
+                                <div class="border-t border-gray-100 pt-5 mb-3">
+                                    <h4 class="text-[13px] font-bold text-gray-800" id="selected-count-text">Selected Files (0)</h4>
+                                </div>
+                                
+                                <div id="selected-files-list" class="max-h-[220px] overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-2">
+                                    <!-- JS Injected Files -->
+                                </div>
+
+                                <div class="flex justify-between items-center mt-6">
+                                    <button onclick="clearSelectedFiles()" class="text-[13px] font-semibold text-gray-600 hover:text-gray-900 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all shadow-sm">Clear All</button>
+                                    <button onclick="startCloudinaryUpload()" id="start-upload-btn" class="flex items-center gap-2 px-6 py-2 bg-brand-yellow rounded-lg text-[13px] font-bold text-gray-900 hover:bg-brand-yellowHover transition-all shadow-sm">
+                                        <i class="fi fi-rr-upload text-[12px]"></i> <span id="upload-btn-text">Upload Files</span>
+                                    </button>
+                                </div>
+
+                                <div id="upload-progress-section" class="hidden w-full mt-6 flex flex-col items-center">
+                                    <div class="flex justify-between w-full mb-2">
+                                        <span class="text-[12px] font-semibold text-gray-700">Uploading files...</span>
+                                        <span id="upload-percent-text" class="text-[12px] font-bold text-brand-blue">0%</span>
+                                    </div>
+                                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div id="upload-progress-bar" class="h-full bg-brand-blue transition-all duration-200" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -259,7 +274,7 @@
         }
 
         // ==========================================
-        // VIEW TOGGLING - Using safe style toggling to avoid CSS Class overrides
+        // VIEW TOGGLING
         // ==========================================
         window.openUploadView = function() {
             document.getElementById('file-views-container').style.display = 'none';
@@ -327,35 +342,40 @@
         function renderSelectedFiles() {
             const section = document.getElementById('selected-files-section');
             const list = document.getElementById('selected-files-list');
+            const topArea = document.getElementById('upload-top-area');
             
             if (selectedFilesArray.length === 0) {
                 section.classList.add('hidden');
+                topArea.classList.replace('p-6', 'p-8');
+                topArea.classList.replace('sm:p-8', 'sm:p-12');
                 return;
             }
 
             section.classList.remove('hidden');
+            topArea.classList.replace('p-8', 'p-6');
+            topArea.classList.replace('sm:p-12', 'sm:p-8');
+            
             document.getElementById('selected-count-text').innerText = `Selected Files (${selectedFilesArray.length})`;
             document.getElementById('upload-btn-text').innerText = `Upload ${selectedFilesArray.length} Files`;
 
             let html = '';
             selectedFilesArray.forEach((file, index) => {
-                let previewHtml = `<div class="w-10 h-10 rounded bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100"><i class="fi ${getFileIcon(file.type)} text-gray-400 text-[18px]"></i></div>`;
+                let previewHtml = `<div class="w-9 h-9 rounded-md bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100"><i class="fi ${getFileIcon(file.type)} text-gray-400 text-[16px]"></i></div>`;
                 if(file.type.startsWith('image/')) {
-                    previewHtml = `<div class="w-10 h-10 rounded shrink-0 border border-gray-100 overflow-hidden"><img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover"></div>`;
+                    previewHtml = `<div class="w-9 h-9 rounded-md shrink-0 border border-gray-100 overflow-hidden"><img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover"></div>`;
                 }
 
-                // min-w-0 on flex blocks prevents uncommonly long file names from expanding outward forcing visual overflow 
                 html += `
-                <div class="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0 group">
-                    <div class="flex items-center gap-4 overflow-hidden flex-1 min-w-0 pr-4">
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg group transition-colors">
+                    <div class="flex items-center gap-3 overflow-hidden flex-1 min-w-0 pr-4">
                         ${previewHtml}
                         <div class="flex flex-col truncate min-w-0">
-                            <span class="text-[13px] font-bold text-gray-800 truncate" title="${file.name}">${file.name}</span>
-                            <span class="text-[12px] text-gray-500 font-medium">${formatBytes(file.size)}</span>
+                            <span class="text-[13px] font-medium text-gray-800 truncate" title="${file.name}">${file.name}</span>
+                            <span class="text-[11px] text-gray-400 font-medium mt-0.5">${formatBytes(file.size)}</span>
                         </div>
                     </div>
-                    <button onclick="removeSelectedFile(${index})" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors shrink-0">
-                        <i class="fi fi-rr-cross-small text-[16px]"></i>
+                    <button onclick="removeSelectedFile(${index})" class="text-gray-400 hover:text-gray-700 w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors shrink-0">
+                        <i class="fi fi-rr-cross-small text-[14px]"></i>
                     </button>
                 </div>`;
             });
