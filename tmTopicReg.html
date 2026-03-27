@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topic Registration</title>
+    <!-- Favicon / PWA Setup -->
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" href="logo-512.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="logo-192.png">
+</head>
+<body>
+    <div class="mb-6 shrink-0 pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 id="tmt-title" class="text-xl sm:text-[22px] font-semibold text-gray-900 leading-tight">Topic Registration</h1>
+            <p class="text-[13px] text-gray-500 mt-1">Submit topics for programs that strictly require it.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-6" id="tmt-list">
+        <div class="col-span-full py-16 text-center text-[13px] text-gray-400">
+            <div class="w-6 h-6 border-2 border-gray-200 border-t-brand-blue rounded-full animate-spin mx-auto mb-3"></div>
+            Fetching topics...
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('tmt-title').innerText = (window.currentTMSection || 'Section') + ' Topic Registration';
+        var section = window.currentTMSection;
+        var team = localStorage.getItem('managerTeam');
+        
+        window.tmtProgramsList = [];
+        window.tmtRegistrationsList = [];
+
+        if (typeof db !== 'undefined' && section && team) {
+            db.collection('programs').where('section', '==', section).where('status', '==', true).where('topicRegistration', '==', true).get().then(snap => {
+                window.tmtProgramsList = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                if(window.tmtProgUnsub) window.tmtProgUnsub();
+                window.tmtProgUnsub = db.collection('registrations').where('team', '==', team).where('section', '==', section).onSnapshot(regSnap => {
+                    window.tmtRegistrationsList = regSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                    window.renderTMTopics();
+                });
+            });
+        }
+
+        window.renderTMTopics = function() {
+            const container = document.getElementById('tmt-list');
+            
+            const filteredRegs = window.tmtRegistrationsList.filter(r => window.tmtProgramsList.some(p => p.id === r.programId));
+
+            if (filteredRegs.length === 0) {
+                container.innerHTML = '<div class="col-span-full py-16 text-center text-[13px] text-gray-500 font-medium bg-white rounded-2xl shadow-sm border border-gray-100">You have no registered programs that require topics.</div>';
+                return;
+            }
+
+            container.innerHTML = filteredRegs.map(reg => {
+                const prog = window.tmtProgramsList.find(p => p.id === reg.programId) || { code: 'Unknown', name: 'Unknown Program' };
+                return `
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] p-5 flex flex-col hover:shadow-md transition-shadow">
+                    <div class="mb-4 flex-1">
+                        <span class="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full mb-2 inline-block shadow-sm">TOPIC REQUIRED</span>
+                        <h3 class="text-[15px] font-bold text-gray-900 leading-tight pr-4">${prog.name}</h3>
+                        <p class="text-[12px] text-gray-500 mt-1 font-mono-custom">${prog.code} &bull; Candidates: ${(reg.chestNumbers||[]).join(', ')}</p>
+                    </div>
+                    <div class="mt-auto">
+                        <input type="text" id="tmt-input-${reg.id}" value="${reg.topic || ''}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-brand-blue/20 transition-all mb-3 placeholder-gray-400" placeholder="Enter registration topic/subject">
+                        <button id="tmt-btn-${reg.id}" onclick="window.saveTMTopic('${reg.id}')" class="w-full bg-brand-blue text-white font-bold text-[12px] py-2.5 rounded-xl hover:bg-opacity-90 shadow-md transition-all flex items-center justify-center gap-2">
+                            <i class="fi fi-rr-disk text-xs"></i> Save Topic
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        window.saveTMTopic = function(regId) {
+            const topic = document.getElementById('tmt-input-' + regId).value.trim();
+            if(!topic) return typeof showToast === 'function' && showToast("❌ Topic cannot be empty.");
+            
+            const btn = document.getElementById('tmt-btn-' + regId);
+            btn.innerHTML = '<div class="w-3 h-3 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>'; btn.disabled = true;
+            db.collection('registrations').doc(regId).update({ topic: topic }).then(() => { typeof showToast === 'function' && showToast("✅ Topic Saved Successfully!"); btn.innerHTML = '<i class="fi fi-rr-disk text-xs"></i> Save Topic'; btn.disabled = false; });
+        }
+    </script>
+</body>
+</html>

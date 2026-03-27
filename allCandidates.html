@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidates UI</title>
+    <!-- Favicon / PWA Setup -->
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" href="logo-512.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="logo-192.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            bg: '#f8f9fc',
+                            border: '#e5e7eb',
+                            textMuted: '#6b7280',
+                            textDark: '#111827',
+                            blue: '#134E8E',
+                            red: '#C00707',
+                            orange: '#FF4400',
+                            yellow: '#FFB33F'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        i[class^="fi-"] { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Dropdown animation */
+        .dropdown-enter { animation: drop-in 0.15s ease-out forwards; transform-origin: top right; }
+        @keyframes drop-in {
+            0% { opacity: 0; transform: scale(0.95) translateY(-5px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-brand-bg font-sans min-h-screen p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-full w-full mx-auto">
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-xl sm:text-[22px] font-semibold text-gray-900 leading-tight">Candidates</h1>
+                <p class="text-[12px] sm:text-[13px] text-gray-500 mt-0.5 sm:mt-1">Manage your candidates</p>
+            </div>
+            
+            <div class="flex items-center ml-4">
+                <button onclick="window.openCandidateSidebar()" class="flex items-center justify-center gap-2 w-10 h-10 sm:w-auto sm:px-5 sm:py-2.5 bg-[#FFB33F] border border-transparent rounded-full text-[13px] font-bold text-[#111827] hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap p-0">
+                    <i class="fi fi-rr-add text-sm sm:text-[13px]"></i>
+                    <span class="hidden sm:block">Create Candidate</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Card Area -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] overflow-hidden">
+            <!-- Toolbar -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-gray-100 gap-4 sm:gap-0">
+                <div class="flex bg-gray-100/80 p-1 rounded-lg items-center w-full sm:w-auto overflow-x-auto no-scrollbar border border-gray-200/60">
+                    <button id="btn-table" onclick="switchView('table')" class="bg-white shadow-sm text-[#111827] text-[13px] font-semibold py-1.5 px-4 rounded-md flex items-center justify-center gap-2 transition-all duration-200 whitespace-nowrap">
+                        <i class="fi fi-rr-table-list text-xs shrink-0"></i>
+                        Table
+                    </button>
+                    <button id="btn-cards" onclick="switchView('cards')" class="text-gray-500 hover:text-gray-800 bg-transparent text-[13px] font-medium py-1.5 px-4 rounded-md flex items-center justify-center gap-2 transition-all duration-200 whitespace-nowrap">
+                        <i class="fi fi-rr-grid text-xs shrink-0"></i>
+                        Cards
+                    </button>
+                </div>
+                <!-- Search -->
+                <div class="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="search-candidates" oninput="applyCandFilters()" placeholder="Search candidates..." 
+                            class="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-[13px] focus:outline-none focus:ring-2 focus:ring-[#FFB33F]/30 focus:border-[#FFB33F] transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Bulk Action Header (Shows up above table/cards when items selected) -->
+            <div id="bulk-header" class="hidden flex items-center justify-between py-2.5 px-6 border-b border-gray-100 bg-blue-50/50">
+                <div class="flex items-center space-x-4">
+                    <div onclick="toggleSelectAll(event)" class="w-5 h-5 rounded-full flex items-center justify-center bg-[#FFC107] cursor-pointer shadow-sm hover:scale-105 transition-transform">
+                        <i class="fi fi-rr-check text-[10px] text-white"></i>
+                    </div>
+                    <span class="text-[13px] font-semibold text-gray-800"><span id="selected-count-text">1</span> selected</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="deleteSelected()" class="flex items-center justify-center gap-2 px-4 py-1.5 bg-[#DC2626] border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-red-700 shadow-sm transition-colors">
+                        <i class="fi fi-rr-trash text-sm"></i>
+                        Delete Selected
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div id="view-table" class="block w-full overflow-x-auto">
+                <div id="candidate-table-container" class="w-full min-w-[800px]">
+                    <!-- Standard Header (Column Names) -->
+                    <div id="standard-header" class="grid grid-cols-12 gap-4 items-center py-3 px-6 border-b border-gray-100 bg-[#FAFAFA]">
+                        <div class="col-span-1 flex items-center">
+                            <div onclick="toggleSelectAll(event)" class="w-5 h-5 rounded-full border-2 border-gray-200 hover:border-[#FFC107] cursor-pointer transition-colors" id="master-checkbox"></div>
+                        </div>
+                        <div class="col-span-5 text-[13px] font-medium text-gray-700">Candidate</div>
+                        <div class="col-span-3 text-[13px] font-medium text-gray-700 text-center">Team</div>
+                        <div class="col-span-2 text-[13px] font-medium text-gray-700 text-center">Section</div>
+                        <div class="col-span-1 text-[13px] font-medium text-gray-700 text-right">Actions</div>
+                    </div>
+                    
+                    <!-- Table Body (Dynamic) -->
+                    <div id="candidate-table-list"></div>
+                </div>
+            </div>
+
+            <!-- CARDS VIEW -->
+            <div id="view-cards" class="hidden p-6 bg-gray-50/50">
+                <div id="candidate-cards-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div class="flex flex-col sm:flex-row justify-between items-center py-3 px-4 sm:px-6 bg-white border-t border-gray-100 text-[13px] text-gray-600">
+                <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-0">
+                    <span id="results-count">Showing results</span>
+                    <span class="text-gray-300 text-[10px] hidden sm:inline">●</span>
+                    <div class="relative ml-2 sm:ml-0">
+                        <select id="cand-per-page" onchange="changeCandPerPage(this.value)" class="appearance-none border border-gray-200 rounded-md py-1 pl-2 pr-6 bg-white outline-none hover:border-gray-300 focus:border-gray-400 cursor-pointer">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                            <i class="fi fi-rr-angle-small-down text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <button id="cand-prev-page" onclick="changeCandPage(-1)" class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><i class="fi fi-rr-angle-small-left text-xs"></i></button>
+                    <span id="cand-page-info" class="text-gray-600 text-[12px] sm:text-[13px]">Page 1 of 1</span>
+                    <button id="cand-next-page" onclick="changeCandPage(1)" class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><i class="fi fi-rr-angle-small-right text-xs"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Action Menu -->
+    <div id="global-action-menu" class="hidden fixed w-36 bg-white border border-gray-200 rounded-lg shadow-xl z-[100] py-1 overflow-hidden dropdown-enter">
+        <button id="btn-view" class="w-full text-left px-4 py-2.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
+            <i class="fi fi-rr-eye text-[15px] mr-2.5 text-gray-500"></i> View
+        </button>
+        <button id="btn-edit" class="w-full text-left px-4 py-2.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
+            <i class="fi fi-rr-edit text-[15px] mr-2.5 text-gray-500"></i> Edit
+        </button>
+        <div class="border-t border-gray-100 my-0.5"></div>
+        <button id="btn-delete" class="w-full text-left px-4 py-2.5 text-[13px] font-medium text-red-600 hover:bg-red-50 flex items-center transition-colors">
+            <i class="fi fi-rr-trash text-[15px] mr-2.5 text-red-500"></i> Delete
+        </button>
+    </div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <div id="candidateOverlay" onclick="window.closeCandidateSidebar()" class="fixed inset-0 bg-gray-900/60 z-[60] hidden transition-opacity duration-300"></div>
+    
+    <div id="candidateSidebar" class="fixed inset-y-0 right-0 w-full sm:w-[550px] bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="px-6 py-5 flex items-center justify-between bg-white border-b border-gray-100">
+            <h2 id="sidebar-title" class="text-[18px] font-bold text-gray-900">Create Candidate</h2>
+            <button onclick="window.closeCandidateSidebar()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors">
+                <i class="fi fi-rr-cross text-sm"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5">
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Chest Number *</label>
+                    <input type="text" id="candChest" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all">
+                </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Name *</label>
+                    <input type="text" id="candName" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all">
+                </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Admission Number</label>
+                    <input type="text" id="candAdmn" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all">
+                </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Class</label>
+                    <div class="relative">
+                        <select id="candClass" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select Class</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                            <i class="fi fi-rr-angle-small-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Team *</label>
+                    <div class="relative">
+                        <select id="candTeam" onchange="window.autoGenerateChestNo()" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select Team</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                            <i class="fi fi-rr-angle-small-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Section *</label>
+                    <div class="relative">
+                        <select id="candSection" onchange="window.updateClassDropdown()" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select Section</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                            <i class="fi fi-rr-angle-small-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-1 sm:col-span-2 flex items-center mt-2">
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" id="candActive" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFB33F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFB33F] shadow-inner transition-colors"></div>
+                        <span class="ml-3 text-[13px] font-medium text-gray-800 group-hover:text-gray-900 transition-colors">Active Candidate</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 bg-white flex justify-end gap-3 border-t border-gray-100">
+            <button onclick="window.closeCandidateSidebar()" class="flex items-center justify-center gap-2 px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-full text-[13px] font-bold hover:bg-gray-50 transition-all shadow-sm">
+                <i class="fi fi-rr-cross text-xs"></i> Cancel
+            </button>
+            <button id="btn-save-candidate" onclick="window.saveCandidate()" class="flex items-center justify-center gap-2 px-5 py-2 bg-[#FFB33F] text-[#111827] rounded-full text-[13px] font-bold hover:bg-opacity-90 transition-all shadow-sm">
+                <i class="fi fi-rr-disk text-sm"></i>
+                <span id="btn-save-candidate-text">Create Candidate</span>
+            </button>
+        </div>
+    </div>
+    <!-- =================================== -->
+
+    <script>
+        var candidatesData = [];
+        const userRole = localStorage.getItem('userRole');
+        const isTeamManager = userRole === 'Team Manager';
+
+        // STATE MANAGERS
+        var selectedIds = new Set();
+        var editingCandidateId = null;
+        var activeDropdownId = null;
+        var activeTeamsData = [];
+        var activeSectionsData = [];
+        var candCurrentPage = 1;
+        var candItemsPerPage = 25;
+
+        function getTeamColor(teamName) {
+            const team = activeTeamsData.find(t => t.name === teamName);
+            return team && team.color ? team.color : '#9CA3AF';
+        }
+
+        // Checkbox Generators
+        function getUncheckedIcon(id) {
+            return `<div onclick="toggleSelection('${id}', event)" class="w-5 h-5 rounded-full border-2 border-gray-200 hover:border-[#FFC107] bg-white cursor-pointer transition-colors"></div>`;
+        }
+        function getCheckedIcon(id) {
+            return `<div onclick="toggleSelection('${id}', event)" class="w-5 h-5 rounded-full flex items-center justify-center bg-[#FFC107] cursor-pointer hover:scale-105 transition-transform">
+                        <i class="fi fi-rr-check text-[10px] text-white"></i>
+                    </div>`;
+        }
+
+        // Clean 3-Dot Action Menu
+        function getActionMenu(id) {
+            return `
+                <div class="relative inline-block text-left menu-container">
+                    <button onclick="openActionMenu('${id}', event)" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-800">
+                        <i class="fi fi-rr-menu-dots-vertical text-xs"></i>
+                    </button>
+                </div>`;
+        }
+
+        // FILTERING & SEARCH LOGIC
+        var candSearchQuery = '';
+        
+        function applyCandFilters() {
+            candSearchQuery = document.getElementById('search-candidates').value.toLowerCase().trim();
+            candCurrentPage = 1;
+            renderUI();
+        }
+
+        function getFilteredCandidates() {
+            if (!candSearchQuery) return candidatesData;
+            return candidatesData.filter(c => {
+                const nameMatch = c.name && c.name.toLowerCase().includes(candSearchQuery);
+                if (isTeamManager) return nameMatch;
+                
+                return nameMatch ||
+                    (c.chestNo && String(c.chestNo).toLowerCase().includes(candSearchQuery)) ||
+                    (c.admissionNo && String(c.admissionNo).toLowerCase().includes(candSearchQuery)) ||
+                    (c.team && c.team.toLowerCase().includes(candSearchQuery)) ||
+                    (c.section && c.section.toLowerCase().includes(candSearchQuery));
+            });
+        }
+
+        // RENDER FUNCTION
+        function renderUI() {
+            const tableList = document.getElementById('candidate-table-list');
+            const cardsList = document.getElementById('candidate-cards-list');
+            const filteredData = getFilteredCandidates();
+            
+            const totalItems = filteredData.length;
+            const totalPages = Math.ceil(totalItems / candItemsPerPage) || 1;
+            if (candCurrentPage > totalPages) candCurrentPage = totalPages;
+            if (candCurrentPage < 1) candCurrentPage = 1;
+            const startIndex = (candCurrentPage - 1) * candItemsPerPage;
+            const endIndex = Math.min(startIndex + candItemsPerPage, totalItems);
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
+            document.getElementById('results-count').innerText = `Showing ${totalItems > 0 ? startIndex + 1 : 0} to ${endIndex} of ${totalItems} results`;
+            document.getElementById('cand-page-info').innerText = `Page ${candCurrentPage} of ${totalPages}`;
+            document.getElementById('cand-prev-page').disabled = candCurrentPage === 1;
+            document.getElementById('cand-next-page').disabled = candCurrentPage === totalPages;
+
+            // Toggle Bulk Header
+            const stdHeader = document.getElementById('standard-header');
+            const blkHeader = document.getElementById('bulk-header');
+            
+            if(selectedIds.size > 0) {
+                stdHeader.classList.add('hidden');
+                blkHeader.classList.remove('hidden');
+                document.getElementById('selected-count-text').innerText = selectedIds.size;
+            } else {
+                stdHeader.classList.remove('hidden');
+                blkHeader.classList.add('hidden');
+                document.getElementById('master-checkbox').outerHTML = `<div onclick="toggleSelectAll(event)" class="w-5 h-5 rounded-full border-2 border-gray-200 hover:border-[#FFC107] cursor-pointer transition-colors" id="master-checkbox"></div>`;
+            }
+
+            if (filteredData.length === 0) {
+                tableList.innerHTML = `<div class="flex justify-center items-center py-20"><p class="text-[13px] text-gray-500 font-medium">No candidates found</p></div>`;
+                cardsList.innerHTML = `<div class="flex justify-center items-center py-14 col-span-full"><p class="text-[13px] text-gray-500 font-medium">No candidates found</p></div>`;
+                return;
+            }
+
+            let tableHTML = '';
+            let cardsHTML = '';
+
+            paginatedData.forEach(cand => {
+                const initial = cand.name ? cand.name.charAt(0).toUpperCase() : '?';
+                const teamColorHex = getTeamColor(cand.team);
+                const isSelected = selectedIds.has(cand.id);
+                
+                // Card & Row styling based on selection
+                const cardBorder = isSelected ? 'border-2 border-[#FFC107]' : 'border border-gray-200';
+                const rowBg = isSelected ? 'bg-blue-50/20' : 'bg-white hover:bg-gray-50';
+
+                // --- TABLE ROW ---
+                tableHTML += `
+                <div class="grid grid-cols-12 gap-4 items-center py-2.5 px-6 border-b border-gray-100 ${rowBg} transition-colors group">
+                    <div class="col-span-1">
+                        ${isSelected ? getCheckedIcon(cand.id) : getUncheckedIcon(cand.id)}
+                    </div>
+                    <div class="col-span-5 flex items-center space-x-3.5">
+                        <div class="w-9 h-9 rounded-full border border-[#FFD085] flex items-center justify-center bg-[#F8F9FA] text-gray-600 font-medium text-[15px] shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="flex flex-col items-start">
+                            <span onclick="window.viewCandidate('${cand.id}', event)" class="text-[14px] font-medium text-gray-900 leading-snug hover:text-brand-blue hover:underline cursor-pointer transition-colors">${cand.name}</span>
+                            ${!isTeamManager ? `<div class="text-[12.5px] text-[#6B7280] font-mono-custom mt-0.5 tracking-tight">#${cand.chestNo} &bull; Adm: ${cand.admissionNo}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="col-span-3 flex items-center justify-center space-x-2">
+                        <span class="w-[7px] h-[7px] rounded-full" style="background-color: ${teamColorHex}"></span>
+                        <span class="text-[13px] text-gray-700 font-medium">${cand.team}</span>
+                    </div>
+                    <div class="col-span-2 flex items-center justify-center">
+                        <span class="px-2.5 py-1 bg-white border border-gray-200 rounded-full text-[11px] font-medium text-gray-600 shadow-sm leading-tight">${cand.section}</span>
+                    </div>
+                    <div class="col-span-1 flex justify-end">
+                        ${getActionMenu(cand.id)}
+                    </div>
+                </div>`;
+
+                // --- CARD VIEW ---
+                cardsHTML += `
+                <div class="bg-white ${cardBorder} rounded-xl p-4 relative shadow-sm hover:shadow-md transition-shadow">
+                    <div class="absolute top-4 right-4 z-10">
+                         ${isSelected ? getCheckedIcon(cand.id) : getUncheckedIcon(cand.id)}
+                    </div>
+                    
+                    <div class="flex items-start space-x-3.5 relative z-0">
+                        <div class="w-10 h-10 rounded-full border border-[#FFD085] flex items-center justify-center bg-[#F8F9FA] text-gray-600 font-medium text-[16px] shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="flex-1 pt-0.5">
+                            <div onclick="window.viewCandidate('${cand.id}', event)" class="text-[14.5px] font-semibold text-gray-900 pr-8 hover:text-brand-blue hover:underline cursor-pointer transition-colors w-max">${cand.name}</div>
+                            <div class="flex items-center space-x-2 mt-1">
+                                ${!isTeamManager ? `<span class="text-[12.5px] text-[#6B7280] font-mono-custom tracking-tight">#${cand.chestNo} &bull; Adm: ${cand.admissionNo}</span>` : ''}
+                                <span class="px-2.5 py-1 bg-white border border-gray-200 rounded-full text-[10px] font-medium text-gray-600 shadow-sm leading-tight">${cand.section}</span>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-3">
+                                <span class="w-[7px] h-[7px] rounded-full" style="background-color: ${teamColorHex}"></span>
+                                <span class="text-[13px] text-gray-600 font-medium">${cand.team}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-3 right-3 z-10">
+                        ${getActionMenu(cand.id)}
+                    </div>
+                </div>`;
+            });
+
+            tableList.innerHTML = tableHTML;
+            cardsList.innerHTML = cardsHTML;
+        }
+
+        // SELECTION LOGIC
+        window.changeCandPage = function(dir) {
+            candCurrentPage += dir;
+            renderUI();
+        };
+        
+        window.changeCandPerPage = function(val) {
+            candItemsPerPage = parseInt(val);
+            candCurrentPage = 1;
+            renderUI();
+        };
+
+        function toggleSelection(id, event) {
+            event.stopPropagation(); // Prevents bubbling to other elements
+            if (selectedIds.has(id)) selectedIds.delete(id);
+            else selectedIds.add(id);
+            renderUI();
+        }
+
+        function toggleSelectAll(event) {
+            if(event) event.stopPropagation();
+            const filteredData = getFilteredCandidates();
+            if (selectedIds.size === filteredData.length && filteredData.length > 0) {
+                selectedIds.clear();
+            } else {
+                filteredData.forEach(c => selectedIds.add(c.id));
+            }
+            renderUI();
+        }
+
+        function deleteSelected() {
+            if(confirm(`Are you sure you want to delete ${selectedIds.size} candidates?`)) {
+                const batch = db.batch();
+                selectedIds.forEach(id => batch.delete(db.collection('candidates').doc(id)));
+                batch.commit().then(() => {
+                    selectedIds.clear();
+                    typeof showToast === 'function' && showToast("✅ Candidates deleted!");
+                });
+            }
+        }
+
+        function deleteSingleCandidate(id, event) {
+            event.stopPropagation();
+            if(confirm(`Delete this candidate?`)) {
+                db.collection('candidates').doc(id).delete().then(() => {
+                    selectedIds.delete(id);
+                    activeDropdownId = null;
+                    typeof showToast === 'function' && showToast("✅ Candidate deleted!");
+                });
+            }
+        }
+
+        // VIEW CANDIDATE PROFILE
+        window.viewCandidate = function(id, event) {
+            if(event) event.stopPropagation();
+            const cand = candidatesData.find(c => c.id === id);
+            if(!cand) return;
+            localStorage.setItem('viewCandidateId', id);
+            localStorage.setItem('viewCandidateName', cand.name);
+            if (typeof loadModule === 'function') loadModule('viewCandidateData');
+        };
+
+        // VIEW TEAM PROFILE BY NAME
+        window.viewTeamByName = function(teamName, event) {
+            if(event) event.stopPropagation();
+            const team = activeTeamsData.find(t => t.name === teamName);
+            if(!team) return;
+            localStorage.setItem('viewTeamId', team.id);
+            localStorage.setItem('viewTeamName', team.name);
+            if (typeof loadModule === 'function') loadModule('viewTeamData');
+        };
+
+        // DROPDOWN LOGIC
+        function openActionMenu(id, event) {
+            event.stopPropagation();
+            if (activeDropdownId === id) {
+                closeAllDropdowns();
+                return;
+            }
+            activeDropdownId = id;
+            
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+            const menu = document.getElementById('global-action-menu');
+            
+            menu.classList.remove('hidden');
+            
+            // Auto-adjust if menu goes off the bottom of the screen
+            const menuHeight = menu.offsetHeight;
+            let topPos = rect.bottom + 4;
+            if (topPos + menuHeight > window.innerHeight) {
+                topPos = rect.top - menuHeight - 4;
+            }
+            
+            menu.style.top = topPos + 'px';
+            menu.style.left = (rect.right - 144) + 'px'; // w-36 = 144px
+            
+            document.getElementById('btn-view').onclick = (e) => { window.candCloseDropdowns(); viewCandidate(id, e); };
+            
+            const btnEdit = document.getElementById('btn-edit');
+            const btnDelete = document.getElementById('btn-delete');
+            
+            if (isTeamManager) {
+                btnEdit.classList.add('hidden');
+                btnDelete.classList.add('hidden');
+            } else {
+                btnEdit.classList.remove('hidden');
+                btnDelete.classList.remove('hidden');
+                btnEdit.onclick = (e) => { window.candCloseDropdowns(); editCandidate(id, e); };
+                btnDelete.onclick = (e) => { window.candCloseDropdowns(); deleteSingleCandidate(id, e); };
+            }
+        }
+
+        if (window.candCloseDropdowns) {
+            document.removeEventListener('click', window.candCloseDropdowns);
+            window.removeEventListener('scroll', window.candCloseDropdowns, true);
+        }
+        
+        window.candCloseDropdowns = function(event) {
+            const menu = document.getElementById('global-action-menu');
+            if (event && event.type === 'click' && menu && menu.contains(event.target)) return;
+            activeDropdownId = null;
+            if (menu) menu.classList.add('hidden');
+        }
+
+        document.addEventListener('click', window.candCloseDropdowns);
+        window.addEventListener('scroll', window.candCloseDropdowns, true);
+
+        // VIEW SWITCHER
+        function switchView(viewName) {
+            const viewTable = document.getElementById('view-table');
+            const viewCards = document.getElementById('view-cards');
+            const btnTable = document.getElementById('btn-table');
+            const btnCards = document.getElementById('btn-cards');
+
+            const activeClassList = "bg-white shadow-sm text-[#111827] text-[13px] font-semibold py-1.5 px-4 rounded-md flex items-center justify-center gap-2 transition-all duration-200 whitespace-nowrap";
+            const inactiveClassList = "text-gray-500 hover:text-gray-800 bg-transparent text-[13px] font-medium py-1.5 px-4 rounded-md flex items-center justify-center gap-2 transition-all duration-200 whitespace-nowrap";
+
+            if (viewName === 'table') {
+                viewTable.classList.remove('hidden'); viewCards.classList.add('hidden');
+                btnTable.className = activeClassList;
+                btnCards.className = inactiveClassList;
+            } else {
+                viewTable.classList.add('hidden'); viewCards.classList.remove('hidden');
+                btnTable.className = inactiveClassList;
+                btnCards.className = activeClassList;
+            }
+        }
+
+        window.autoGenerateChestNo = function() {
+            const teamName = document.getElementById('candTeam').value;
+            const chestInput = document.getElementById('candChest');
+            
+            // Only auto-generate if creating a new candidate (not editing)
+            if (editingCandidateId !== null) return;
+            
+            if (!teamName) {
+                chestInput.value = '';
+                return;
+            }
+            
+            // Get all teams to determine the consistent base (100, 200, 300...)
+            db.collection('teams').get().then(snap => {
+                const allTeams = snap.docs.map(d => d.data());
+                allTeams.sort((a, b) => {
+                    const tA = a.createdAt && typeof a.createdAt.toMillis === 'function' ? a.createdAt.toMillis() : 0;
+                    const tB = b.createdAt && typeof b.createdAt.toMillis === 'function' ? b.createdAt.toMillis() : 0;
+                    if (tA !== tB) return tA - tB;
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+                
+                const teamData = allTeams.find(t => (t.name || '').trim().toLowerCase() === teamName.trim().toLowerCase());
+                
+                let maxChest = 0;
+                candidatesData.forEach(c => {
+                    if ((c.team || '').trim().toLowerCase() === teamName.trim().toLowerCase()) {
+                        let num = parseInt(String(c.chestNo).replace(/\D/g, ''), 10) || 0;
+                        if (num > maxChest) maxChest = num;
+                    }
+                });
+                
+                if (teamData && teamData.chestNoSeries > 0) {
+                    if (maxChest < teamData.chestNoSeries) {
+                        maxChest = teamData.chestNoSeries;
+                    }
+                } else {
+                    // Fallback to original creation order logic
+                    let teamIndex = allTeams.findIndex(t => (t.name || '').trim().toLowerCase() === teamName.trim().toLowerCase());
+                    if (teamIndex === -1) teamIndex = 0;
+                    let teamBase = (teamIndex + 1) * 100;
+                    
+                    if (maxChest < teamBase) maxChest = teamBase;
+                }
+                chestInput.value = maxChest + 1;
+                
+                // Brief highlight effect to show it was auto-generated
+                chestInput.classList.add('bg-[#FFB33F]/10', 'border-[#FFB33F]');
+                setTimeout(() => chestInput.classList.remove('bg-[#FFB33F]/10', 'border-[#FFB33F]'), 600);
+            });
+        };
+
+        window.updateClassDropdown = function(selectedClass = '') {
+            const sectionName = document.getElementById('candSection').value;
+            const classSelect = document.getElementById('candClass');
+            const section = activeSectionsData.find(s => s.name === sectionName);
+            
+            let optionsHTML = '<option value="" disabled selected>Select Class</option>';
+            if (section && section.classes && section.classes.length > 0) {
+                section.classes.forEach(c => {
+                    optionsHTML += `<option value="${c}">${c}</option>`;
+                });
+            } else {
+                optionsHTML += `<option value="" disabled>No classes available</option>`;
+            }
+            classSelect.innerHTML = optionsHTML;
+            if (selectedClass) classSelect.value = selectedClass;
+        }
+
+        // SIDEBAR FORM LOGIC
+        window.openCandidateSidebar = function() {
+            editingCandidateId = null;
+            document.getElementById('sidebar-title').innerText = "Create Candidate";
+            document.getElementById('btn-save-candidate-text').innerText = "Create Candidate";
+            
+            ['candChest', 'candName', 'candAdmn', 'candClass', 'candTeam', 'candSection'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('candActive').checked = true;
+
+            document.getElementById('candidateOverlay').classList.remove('hidden');
+            document.getElementById('candidateSidebar').classList.remove('translate-x-full');
+            setTimeout(() => document.getElementById('candChest').focus(), 320);
+        };
+
+        window.editCandidate = function(id, event) {
+            event.stopPropagation();
+            const cand = candidatesData.find(c => c.id === id);
+            if(!cand) return;
+
+            editingCandidateId = id;
+            activeDropdownId = null;
+
+            document.getElementById('sidebar-title').innerText = "Edit Candidate";
+            document.getElementById('btn-save-candidate-text').innerText = "Update Candidate";
+
+            document.getElementById('candChest').value = cand.chestNo;
+            document.getElementById('candName').value = cand.name;
+            document.getElementById('candAdmn').value = cand.admissionNo === 'N/A' ? '' : cand.admissionNo;
+            document.getElementById('candTeam').value = cand.team;
+            document.getElementById('candSection').value = cand.section;
+            window.updateClassDropdown(cand.class || '');
+            document.getElementById('candActive').checked = cand.active;
+
+            document.getElementById('candidateOverlay').classList.remove('hidden');
+            document.getElementById('candidateSidebar').classList.remove('translate-x-full');
+        };
+
+        window.closeCandidateSidebar = function() {
+            document.getElementById('candidateOverlay').classList.add('hidden');
+            document.getElementById('candidateSidebar').classList.add('translate-x-full');
+        };
+
+        window.saveCandidate = function() {
+            const chestNo = document.getElementById('candChest').value.trim();
+            const name = document.getElementById('candName').value.trim();
+            const admissionNo = document.getElementById('candAdmn').value.trim();
+            const className = document.getElementById('candClass').value.trim(); 
+            const team = document.getElementById('candTeam').value;
+            const section = document.getElementById('candSection').value;
+            const active = document.getElementById('candActive').checked;
+
+            if(!chestNo || !name || !team || !section) {
+                return typeof showToast === 'function' ? showToast("❌ Please fill out all required fields (*)") : alert("❌ Please fill out all required fields (*)");
+            }
+            
+            const payload = { chestNo, name, admissionNo: admissionNo || 'N/A', class: className, team, section, active };
+            if (typeof firebase !== 'undefined' && firebase.firestore) {
+                payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
+            if(editingCandidateId !== null) {
+                db.collection('candidates').doc(editingCandidateId).update(payload).then(() => {
+                    typeof showToast === 'function' && showToast("✅ Candidate updated!");
+                    window.closeCandidateSidebar();
+                });
+            } else {
+                if (typeof firebase !== 'undefined' && firebase.firestore) {
+                    payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                }
+                db.collection('candidates').add(payload).then(() => {
+                    typeof showToast === 'function' && showToast("✅ Candidate added!");
+                    window.closeCandidateSidebar();
+                });
+            }
+        }
+
+        // REAL-TIME LISTENERS (Candidates, Teams, Sections)
+        if(window.candUnsub) window.candUnsub();
+        if(window.candTeamsUnsub) window.candTeamsUnsub();
+        if(window.candSectionsUnsub) window.candSectionsUnsub();
+
+        if(typeof db !== 'undefined') {
+            // 1. Teams Listener (Only active)
+            window.candTeamsUnsub = db.collection('teams').where('isActive', '==', true).onSnapshot(snap => {
+                activeTeamsData = [];
+                const teamSelect = document.getElementById('candTeam');
+                const currentVal = teamSelect.value;
+                let optionsHTML = '<option value="" disabled selected>Select Team</option>';
+                snap.forEach(doc => {
+                    const team = doc.data();
+                    activeTeamsData.push(team);
+                    optionsHTML += `<option value="${team.name}">${team.name}</option>`;
+                });
+                teamSelect.innerHTML = optionsHTML;
+                if(currentVal) teamSelect.value = currentVal;
+                renderUI(); // Re-render to update dynamic dot colors
+            });
+
+            // 2. Sections Listener (Only active)
+            window.candSectionsUnsub = db.collection('sections').where('isActive', '==', true).onSnapshot(snap => {
+                activeSectionsData = snap.docs.map(doc => doc.data());
+                const sectionSelect = document.getElementById('candSection');
+                const currentVal = sectionSelect.value;
+                let optionsHTML = '<option value="" disabled selected>Select Section</option>';
+                activeSectionsData.forEach(section => {
+                    optionsHTML += `<option value="${section.name}">${section.name}</option>`;
+                });
+                sectionSelect.innerHTML = optionsHTML;
+                if(currentVal) {
+                    sectionSelect.value = currentVal;
+                    window.updateClassDropdown();
+                }
+            });
+
+            // 3. Candidates Listener
+            window.candUnsub = db.collection('candidates').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                candidatesData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Sort by extracted number from candidate chest number
+                candidatesData.sort((a, b) => {
+                    const numA = parseInt(String(a.chestNo || '').replace(/\D/g, ''), 10) || 0;
+                    const numB = parseInt(String(b.chestNo || '').replace(/\D/g, ''), 10) || 0;
+                    if (numA !== numB) return numA - numB;
+                    return String(a.chestNo || '').localeCompare(String(b.chestNo || ''), undefined, { numeric: true, sensitivity: 'base' });
+                });
+                renderUI();
+            });
+        }
+    </script>
+</body>
+</html>
