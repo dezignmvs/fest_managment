@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Toppers UI</title>
+    <!-- Favicon / PWA Setup -->
+    <link rel="icon" href="favicon.ico" sizes="any">
+    
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons & Toastify -->
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            bg: '#f8f9fc',
+                            border: '#e5e7eb',
+                            textMuted: '#6b7280',
+                            textDark: '#111827',
+                            blue: '#134E8E',
+                            yellow: '#FFB33F',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fc; }
+        i[class^="fi-"] { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-brand-bg font-sans min-h-screen p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-full w-full mx-auto relative">
+        
+        <!-- Header Section -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-[22px] font-bold text-gray-900 leading-tight">Team Toppers</h1>
+                <p class="text-[13px] text-gray-500 mt-1">Toppers analytics for teams across various sections, categories, groups</p>
+            </div>
+            
+            <!-- Global Filter Controls -->
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-32">
+                    <select id="globalStatus" class="w-full pl-4 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-700 font-medium focus:outline-none focus:border-brand-yellow appearance-none cursor-pointer shadow-sm transition-all">
+                        <option value="none">All</option>
+                        <option value="published" selected>Published</option>
+                    </select>
+                    <i class="fi fi-rr-angle-small-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                </div>
+                <button onclick="applyFilters()" class="flex items-center justify-center px-5 py-2 bg-[#FFB33F] rounded-lg text-[13px] font-bold text-gray-900 hover:bg-opacity-90 transition-all shadow-sm">
+                    Apply
+                </button>
+            </div>
+        </div>
+
+        <!-- Initial Empty State -->
+        <div id="initial-empty-state" class="flex items-center justify-center h-[50vh]">
+            <p class="text-[14px] font-medium text-gray-800">Please select "All" or "Published" status to view result.</p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div id="main-content" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            <!-- LEFT COLUMN: Overall Toppers -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col h-[600px] overflow-hidden animate-fade-in">
+                <!-- Card Header -->
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-white">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <i class="fi fi-rr-trophy text-[#FFB33F] text-lg"></i>
+                            <h2 class="text-[15px] font-bold text-gray-900">Overall Toppers</h2>
+                        </div>
+                        <p class="text-[12.5px] text-gray-500 mt-1">Top performing teams across all sections</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportData('overall')" class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                            <i class="fi fi-rr-file-export"></i> Export
+                        </button>
+                        <div class="flex items-center bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                            <span class="pl-3 pr-2 py-1.5 text-[12px] text-gray-500 border-r border-gray-200 bg-gray-50">Limit:</span>
+                            <input type="number" id="overallLimit" value="10" onchange="updateRankings()" min="1" class="w-12 px-2 py-1.5 text-[12px] text-center font-medium focus:outline-none text-gray-800">
+                        </div>
+                    </div>
+                </div>
+                <!-- List Area -->
+                <div class="p-5 overflow-y-auto flex-1 custom-scrollbar space-y-3" id="overall-toppers-list">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Section Toppers -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col h-[600px] overflow-hidden animate-fade-in" style="animation-delay: 0.1s">
+                <!-- Card Header -->
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-white">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <i class="fi fi-rr-users text-[#FFB33F] text-lg"></i>
+                            <h2 class="text-[15px] font-bold text-gray-900">Section-wise Toppers</h2>
+                        </div>
+                        <p class="text-[12.5px] text-gray-500 mt-1">Top performing teams within specific sections</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportData('section')" class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                            <i class="fi fi-rr-file-export"></i> Export
+                        </button>
+                        <div class="flex items-center bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                            <span class="pl-3 pr-2 py-1.5 text-[12px] text-gray-500 border-r border-gray-200 bg-gray-50">Limit:</span>
+                            <input type="number" id="sectionLimit" value="10" onchange="updateRankings()" min="1" class="w-12 px-2 py-1.5 text-[12px] text-center font-medium focus:outline-none text-gray-800">
+                        </div>
+                    </div>
+                </div>
+                <!-- Content Area -->
+                <div class="p-5 flex flex-col flex-1 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-5 shrink-0">
+                        <span class="text-[13px] font-medium text-gray-800">Select Section</span>
+                        <div class="relative w-40">
+                            <select id="sectionSelector" onchange="handleSectionChange()" class="w-full pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-700 focus:outline-none focus:border-brand-blue appearance-none cursor-pointer shadow-sm transition-all">
+                                <option value="" disabled selected>-- Select... --</option>
+                                <option value="All Sections">All Sections</option>
+                            </select>
+                            <i class="fi fi-rr-angle-small-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                        </div>
+                    </div>
+                    <!-- Empty State -->
+                    <div id="section-empty-state" class="flex-1 flex items-center justify-center">
+                        <p class="text-[13px] font-medium text-gray-500">Please select a section to view toppers</p>
+                    </div>
+                    <!-- List Area -->
+                    <div id="section-toppers-list" class="hidden flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Version 8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        // Initialize Firebase (Replace with your actual config if needed)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKA0k_9UgoJX_RBgEsIeNdiW2w0Okko1o",
+            authDomain: "festie-s1u2h3.firebaseapp.com",
+            projectId: "festie-s1u2h3"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Local State
+        let _data = {
+            teams: [],
+            candidates: [],
+            results: [],
+            sections: [],
+            programs: [],
+            negativeMarks: []
+        };
+        
+        let _activeReady = false;
+        let _currentSection = null;
+        
+        // Track initial data load status for all collections
+        let _dataLoaded = {
+            teams: false,
+            candidates: false,
+            results: false,
+            sections: false,
+            programs: false,
+            negativeMarks: false
+        };
+        // Final sorted arrays for export purposes
+        let _currentOverallData = [];
+        let _currentSectionData = [];
+
+        // Pre-defined fallback colors if team color is missing
+        const fallbackColors = ['#DC2626', '#2563EB', '#10B981', '#EAB308', '#8B5CF6', '#F97316', '#EC4899'];
+
+        let _autoApplied = false;
+
+        // Start Realtime Listeners
+        function startRealtimeSync() {
+            db.collection('teams').where('isActive', '==', true).onSnapshot(snap => {
+                _data.teams = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                _dataLoaded.teams = true;
+                if (_activeReady) updateRankings();
+                checkInitialLoadComplete();
+            });
+
+            db.collection('candidates').onSnapshot(snap => {
+                _data.candidates = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                _dataLoaded.candidates = true;
+                if (_activeReady) updateRankings();
+                checkInitialLoadComplete();
+            });
+
+            db.collection('programResults').onSnapshot(snap => {
+                _data.results = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                _dataLoaded.results = true;
+                if (_activeReady) updateRankings();
+                checkInitialLoadComplete();
+            });
+
+            db.collection('sections').where('isActive', '==', true).onSnapshot(snap => {
+                _data.sections = snap.docs.map(doc => doc.data().name).filter(n => n);
+                _dataLoaded.sections = true;
+                populateSectionDropdown();
+                if (_activeReady) updateRankings(); // Update section-wise toppers if sections change
+                checkInitialLoadComplete();
+            });
+
+            db.collection('programs').onSnapshot(snap => {
+                _data.programs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                _dataLoaded.programs = true;
+                if (_activeReady) updateRankings();
+                checkInitialLoadComplete();
+            });
+
+            db.collection('negativeMarks').where('status', '==', 'Active').onSnapshot(snap => {
+                _data.negativeMarks = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                _dataLoaded.negativeMarks = true;
+                if (_activeReady) updateRankings();
+                checkInitialLoadComplete();
+            });
+        }
+
+        function checkInitialLoadComplete() {
+            if (_autoApplied || _activeReady) return;
+            
+            // Check if all essential data collections have loaded at least once
+            const allCollectionsLoaded = Object.values(_dataLoaded).every(status => status === true);
+
+            if (allCollectionsLoaded) {
+                // Now check the conditions for auto-applying filters
+                const hasPublishedPrograms = _data.programs.some(p => p.resultsPublished === true);
+                const hasResultsData = _data.results.length > 0;
+                const hasTeamsData = _data.teams.length > 0;
+
+                if (hasPublishedPrograms && hasResultsData && hasTeamsData) {
+                    _autoApplied = true;
+                    applyFilters(true); // Silent apply
+                } else {
+                    // If all data is loaded but conditions for auto-apply are not met,
+                    // we still want to indicate that the initial loading is done,
+                    // so the user can manually apply filters.
+                    document.getElementById('initial-empty-state').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    _activeReady = true; // Mark as ready for manual interaction
+                    updateRankings(); // Render with whatever data is available
+                }
+            }
+        }
+
+        function populateSectionDropdown() {
+            const select = document.getElementById('sectionSelector');
+            const currentVal = select.value;
+            let opts = '<option value="" disabled selected>-- Select... --</option><option value="All Sections">All Sections</option>';
+            _data.sections.forEach(sec => { opts += `<option value="${sec}">${sec}</option>`; });
+            select.innerHTML = opts;
+            if (currentVal && opts.includes(`value="${currentVal}"`)) select.value = currentVal;
+        }
+
+        // Triggered by "Apply" button
+        function applyFilters(silent = false) {
+            document.getElementById('initial-empty-state').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            _activeReady = true;
+            updateRankings();
+            
+            if (silent) return;
+
+            Toastify({
+                text: "✅ View Applied",
+                duration: 2000,
+                gravity: "bottom", position: "right",
+                style: { background: "#10B981", borderRadius: "8px", fontSize: "13px" }
+            }).showToast();
+        }
+
+        // Triggered by Section Dropdown
+        function handleSectionChange() {
+            _currentSection = document.getElementById('sectionSelector').value;
+            if (_currentSection) {
+                document.getElementById('section-empty-state').classList.add('hidden');
+                document.getElementById('section-toppers-list').classList.remove('hidden');
+                updateRankings();
+            }
+        }
+
+        // Core Calculation Engine
+        function updateRankings() {
+            if (!_activeReady) return;
+            
+            const mode = document.getElementById('globalStatus').value; // 'none' (All) or 'published'
+            const overallLimit = parseInt(document.getElementById('overallLimit').value) || 10;
+            const sectionLimit = parseInt(document.getElementById('sectionLimit').value) || 10;
+
+            const candMap = {}; _data.candidates.forEach(c => candMap[c.id] = c);
+            const progMap = {}; _data.programs.forEach(p => progMap[p.id] = p);
+
+            // Calculate Overall
+            _currentOverallData = calculateToppers('All Sections', mode, overallLimit, candMap, progMap);
+            renderTeamList('overall-toppers-list', _currentOverallData);
+
+            // Calculate Section Specific
+            if (_currentSection) {
+                _currentSectionData = calculateToppers(_currentSection, mode, sectionLimit, candMap, progMap);
+                renderTeamList('section-toppers-list', _currentSectionData);
+            }
+        }
+
+        function calculateToppers(sectionFilter, mode, limit, candMap, progMap) {
+            const stats = {};
+            
+            // 1. Initialize Teams
+            _data.teams.forEach((t, index) => {
+                // Ensure every team has a fallback color for the UI
+                const color = t.color || fallbackColors[index % fallbackColors.length];
+                stats[t.name] = { ...t, color: color, pts: 0, progs: new Set(), participants: 0 };
+            });
+
+            // 2. Count Participants per constraints
+            _data.candidates.forEach(c => {
+                let teamName = c.team || c.teamName;
+                if (teamName && stats[teamName]) {
+                    if (sectionFilter === 'All Sections' || c.section === sectionFilter) {
+                        stats[teamName].participants++;
+                    }
+                }
+            });
+
+            // 3. Aggregate Results Points
+            _data.results.forEach(res => {
+                const prog = progMap[res.programId];
+                
+                // Check Publication Status Constraint
+                const isPub = res.isPublished === true || res.status === 'Published' || (prog && prog.resultsPublished === true);
+                if (mode === 'published' && !isPub) return;
+
+                // Identify the Team & Section associated with this result
+                let teamName = res.team || res.teamName;
+                let actualSection = prog ? prog.section : res.section;
+
+                // Fallback to finding team/section via candidateId if direct team name isn't stored in result
+                if (!teamName && res.candidateId) {
+                    const cand = candMap[res.candidateId];
+                    if (cand) {
+                        teamName = cand.team || cand.teamName;
+                        if (!actualSection) actualSection = cand.section;
+                    }
+                }
+
+                const pts = parseFloat(res.points || res.totalPoints || res.score || 0);
+
+                if (teamName && stats[teamName] && pts > 0) {
+                    // Only assign points if it matches the current section filter view
+                    if (sectionFilter === 'All Sections' || actualSection === sectionFilter) {
+                        stats[teamName].pts += pts;
+                        if (res.programId) stats[teamName].progs.add(res.programId);
+                    }
+                }
+            });
+
+            // 4. Apply Global Negative Marks
+            _data.negativeMarks.forEach(neg => {
+                const penalty = parseFloat(neg.marks || neg.points || 0);
+                let affectedTeams = neg.teams || neg.teamIds || [];
+                if (!Array.isArray(affectedTeams) && typeof affectedTeams === 'string') {
+                    affectedTeams = [affectedTeams];
+                }
+
+                affectedTeams.forEach(tName => {
+                    if (stats[tName]) {
+                        // Negative marks usually apply universally across all leaderboards to affect standing
+                        stats[tName].pts -= penalty;
+                    }
+                });
+            });
+
+            // 5. Sort & Slice
+            return Object.values(stats)
+                .sort((a, b) => b.pts - a.pts) // Sort descending by points
+                .slice(0, limit);
+        }
+
+        // UI Renderer mapping accurately to the screenshot
+        function renderTeamList(containerId, teams) {
+            const container = document.getElementById(containerId);
+            
+            if (teams.length === 0) {
+                container.innerHTML = '<div class="flex items-center justify-center py-10"><p class="text-[13px] text-gray-400">No scoring data available</p></div>';
+                return;
+            }
+
+            let html = '';
+            teams.forEach((t, idx) => {
+                // Generate 2-letter initials
+                const initials = t.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'TM';
+                // Rank formatting based on screenshot (1st gets gold, rest get standard)
+                const rankText = idx + 1;
+                const rankColor = rankText === 1 ? 'text-[#FFB33F]' : 'text-[#FFB33F]'; // Uniform yellow based on SS
+                
+                html += `
+                <div class="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-colors group">
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- Rank Bubble -->
+                        <div class="w-[26px] h-[26px] rounded flex items-center justify-center bg-[#FFF8EB] ${rankColor} text-[12px] font-bold">
+                            ${rankText}
+                        </div>
+                        
+                        <!-- Team Avatar -->
+                        <div class="w-[38px] h-[38px] rounded-full flex items-center justify-center text-white font-bold text-[13px] shadow-sm" style="background-color: ${t.color}">
+                            ${initials}
+                        </div>
+                        
+                        <!-- Team Info -->
+                        <div>
+                            <h3 class="text-[14px] font-bold text-gray-900 leading-tight">${t.name}</h3>
+                            <p class="text-[12px] text-gray-500 mt-0.5">${t.participants || 0} participants</p>
+                        </div>
+                    </div>
+
+                    <!-- Points Data -->
+                    <div class="text-right">
+                        <div class="inline-block px-2.5 py-0.5 bg-brand-blue text-white rounded-full text-[12px] font-bold shadow-sm mb-1">
+                            ${t.pts} pts
+                        </div>
+                        <p class="text-[12px] text-gray-500 font-medium">${t.progs.size || 0} programs</p>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // CSV Export functionality
+        function exportData(type) {
+            let dataToExport = [];
+            let fileName = '';
+
+            if (type === 'overall') {
+                dataToExport = _currentOverallData;
+                fileName = 'Overall_Toppers.csv';
+            } else {
+                dataToExport = _currentSectionData;
+                const secName = _currentSection ? _currentSection.replace(/\s+/g, '_') : 'Section';
+                fileName = `${secName}_Toppers.csv`;
+            }
+
+            if (dataToExport.length === 0) {
+                return Toastify({
+                    text: "❌ No data to export",
+                    duration: 2000, gravity: "bottom", position: "right",
+                    style: { background: "#DC2626", borderRadius: "8px", fontSize: "13px" }
+                }).showToast();
+            }
+
+            const headers = ["Rank", "Team Name", "Total Points", "Participants", "Programs Participated"];
+            const csvRows = [headers.join(',')];
+
+            dataToExport.forEach((t, idx) => {
+                const row = [
+                    idx + 1,
+                    `"${t.name}"`,
+                    t.pts,
+                    t.participants,
+                    t.progs.size
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Toastify({
+                text: "✅ CSV Downloaded successfully",
+                duration: 2000, gravity: "bottom", position: "right",
+                style: { background: "#10B981", borderRadius: "8px", fontSize: "13px" }
+            }).showToast();
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            startRealtimeSync();
+        });
+
+    </script>
+</body>
+</html>
