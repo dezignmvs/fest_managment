@@ -117,13 +117,229 @@
             transition: all 0.2s linear;
             transition-delay: 0.15s;
         }
+
+        /* ── System Offline Screen ── */
+        @keyframes float-slow { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-18px)} }
+        @keyframes pulse-ring { 0%{transform:scale(1);opacity:.6} 70%{transform:scale(1.6);opacity:0} 100%{transform:scale(1.6);opacity:0} }
+        @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.2} }
+        @keyframes slide-up { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes orbit { from{transform:rotate(0deg) translateX(54px) rotate(0deg)} to{transform:rotate(360deg) translateX(54px) rotate(-360deg)} }
+
+        #system-offline-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+            overflow: hidden;
+        }
+
+        #system-offline-screen.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .offline-bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .offline-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .offline-icon-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 32px;
+        }
+
+        .offline-icon-wrap .pulse-ring {
+            position: absolute;
+            inset: -16px;
+            border-radius: 50%;
+            border: 2px solid rgba(239,68,68,.4);
+            animation: pulse-ring 2s cubic-bezier(.4,0,.6,1) infinite;
+        }
+
+        .offline-icon-wrap .pulse-ring:nth-child(2) { animation-delay: .6s; }
+        .offline-icon-wrap .main-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border-radius: 50%;
+            border: 2px solid rgba(239,68,68,.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            animation: float-slow 4s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(239,68,68,.15), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+
+        .offline-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink-dot 1.4s ease-in-out infinite; }
+        .offline-dot:nth-child(2) { animation-delay:.2s; }
+        .offline-dot:nth-child(3) { animation-delay:.4s; }
+
+        .offline-card {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            animation: slide-up .6s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        .offline-error-code {
+            font-size: clamp(90px, 20vw, 140px);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -4px;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 40%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: .18;
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .offline-orbit-wrap {
+            position: absolute;
+            inset: -40px;
+            pointer-events: none;
+        }
+        .offline-orbit-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin: -4px;
+            animation: orbit 6s linear infinite;
+        }
+        .offline-orbit-dot:nth-child(2) { width:6px;height:6px;margin:-3px; animation-delay:-2s; animation-duration:8s; }
+        .offline-orbit-dot:nth-child(3) { width:5px;height:5px;margin:-2.5px; animation-delay:-4s; animation-duration:10s; }
+
+        .offline-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(239,68,68,.08);
+            border: 1px solid rgba(239,68,68,.2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            width: fit-content;
+            margin: 0 auto 24px;
+        }
+
+        .offline-tap-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255,255,255,.12);
+            user-select: none;
+            white-space: nowrap;
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 sm:p-8 font-sans">
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SYSTEM OFFLINE / MAINTENANCE SCREEN             -->
+    <!-- Hidden by default; shown when isActive = false  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="system-offline-screen">
+        <!-- Background -->
+        <div class="offline-bg-grid"></div>
+        <div class="offline-orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 70%);top:-80px;left:-120px;"></div>
+        <div class="offline-orb" style="width:320px;height:320px;background:radial-gradient(circle,rgba(239,68,68,.12),transparent 70%);bottom:-60px;right:-80px;"></div>
+
+        <!-- Content card -->
+        <div class="offline-card">
+
+            <!-- Faint 404 behind everything -->
+            <div class="offline-error-code">404</div>
+
+            <!-- Animated icon -->
+            <div class="offline-icon-wrap">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+
+                <!-- Secret: click logo 5× to show login -->
+                <div id="offline-logo-btn" class="main-icon" title="" onclick="handleOfflineTap()" style="cursor:default;">
+                    <!-- Orbiting dots -->
+                    <div class="offline-orbit-wrap">
+                        <div class="offline-orbit-dot" style="background:#818cf8;"></div>
+                        <div class="offline-orbit-dot" style="background:#6366f1;"></div>
+                        <div class="offline-orbit-dot" style="background:#ef4444;"></div>
+                    </div>
+                    <!-- Icon inside -->
+                    <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Status badge -->
+            <div class="offline-status-bar">
+                <div class="offline-dot"></div>
+                <div class="offline-dot"></div>
+                <div class="offline-dot"></div>
+                <span style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:.08em;text-transform:uppercase;">System Offline</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#fff;margin:0 0 12px;line-height:1.2;letter-spacing:-.5px;">
+                We'll be back soon
+            </h1>
+
+            <!-- Sub text -->
+            <p style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;margin:0 0 32px;max-width:340px;margin-left:auto;margin-right:auto;">
+                The system is currently undergoing scheduled maintenance. We apologise for the inconvenience and will be online shortly.
+            </p>
+
+            <!-- Info pills -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);">Access Restricted</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);" id="offline-fest-name">ArtFest'26</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secret hint (invisible) -->
+        <div class="offline-tap-hint" id="offline-tap-hint">·</div>
+    </div>
+
     <!-- Container -->
-    <div
+    <div id="login-container"
         class="bg-white rounded-[2rem] shadow-xl flex flex-col lg:flex-row w-full max-w-[750px] p-2 border border-gray-100 overflow-hidden relative">
 
         <!-- LEFT SECTION -->
@@ -244,7 +460,7 @@
 
             </form>
         </div>
-    </div>
+    </div><!-- end #login-container -->
 
     <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -258,6 +474,52 @@
         // Check if already logged in
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'dashboard.html';
+        }
+
+        // ── System Status Check ──────────────────────────────
+        // After Firebase loads, we check config/festData.isActive.
+        // If false → show the offline screen and hide the login card.
+        // Owner can secretly access login by clicking the icon 5 times.
+        var _offlineTapCount = 0;
+        var _offlineTapTimer = null;
+
+        function showOfflineScreen(festName) {
+            var screen = document.getElementById('system-offline-screen');
+            var loginCard = document.getElementById('login-container');
+            if (festName) document.getElementById('offline-fest-name').innerText = festName;
+            screen.classList.add('show');
+            loginCard.style.display = 'none';
+        }
+
+        function hideOfflineScreen() {
+            var screen = document.getElementById('system-offline-screen');
+            var loginCard = document.getElementById('login-container');
+            screen.classList.remove('show');
+            loginCard.style.display = '';
+        }
+
+        function handleOfflineTap() {
+            _offlineTapCount++;
+            var hint = document.getElementById('offline-tap-hint');
+
+            // Show subtle dot progress
+            var dots = '';
+            for (var i = 0; i < 5; i++) {
+                dots += i < _offlineTapCount ? '●' : '○';
+            }
+            if (hint) hint.innerText = dots;
+
+            clearTimeout(_offlineTapTimer);
+            _offlineTapTimer = setTimeout(function() {
+                _offlineTapCount = 0;
+                if (hint) hint.innerText = '·';
+            }, 2000);
+
+            if (_offlineTapCount >= 5) {
+                _offlineTapCount = 0;
+                if (hint) hint.innerText = '·';
+                hideOfflineScreen();
+            }
         }
 
         // Handle "Remember Me" on page load
@@ -283,15 +545,30 @@
             firebase.initializeApp(firebaseConfig);
         }
 
-        // Listen for Firestore DB changes for Fest Data
+        // Listen for Firestore DB changes for Fest Data + System Status
         firebase.firestore().collection('config').doc('festData').onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
-                if (data && data.name) {
-                    document.querySelectorAll('.fest-name-display').forEach(el => {
-                        el.innerText = data.name;
-                    });
-                    document.title = data.name + " Login UI";
+                const festName = (data && data.name) ? data.name : 'Festival';
+
+                // Update fest name everywhere
+                document.querySelectorAll('.fest-name-display').forEach(el => {
+                    el.innerText = festName;
+                });
+                document.title = festName + " Login";
+
+                // ── System Status Gate ──────────────────────────────────
+                // If owner set isActive = false → show the offline screen.
+                // When they flip it back to true → login form reappears live.
+                if (data && data.isActive === false) {
+                    showOfflineScreen(festName);
+                } else {
+                    // Only auto-hide if the screen is currently showing
+                    // (don't interfere if it was never shown)
+                    var screen = document.getElementById('system-offline-screen');
+                    if (screen && screen.classList.contains('show')) {
+                        hideOfflineScreen();
+                    }
                 }
             }
         });
