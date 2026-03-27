@@ -260,6 +260,156 @@
             user-select: none;
             white-space: nowrap;
         }
+
+        /* ── Biometric / Face-scan Modal ── */
+        @keyframes scan-line { 0%{top:8%} 50%{top:88%} 100%{top:8%} }
+        @keyframes corner-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+        @keyframes spinner-ring { to{transform:rotate(360deg)} }
+        @keyframes bio-slide-up { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .bio-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(8,8,20,.92);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+        }
+        .bio-modal-overlay.show { display: flex; }
+
+        .bio-modal-box {
+            background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
+            border: 1px solid rgba(129,140,248,.2);
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            max-width: 420px;
+            width: calc(100% - 32px);
+            text-align: center;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04);
+            animation: bio-slide-up .4s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        /* Camera face-scan area */
+        .face-scan-wrap {
+            position: relative;
+            width: 256px;
+            height: 256px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000;
+            border: 2px solid rgba(129,140,248,.3);
+        }
+        .face-scan-wrap video {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror */
+        }
+        .face-scan-wrap canvas.face-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            transform: scaleX(-1);
+        }
+        /* Animated scan line */
+        .face-scan-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #818cf8, #6366f1, #818cf8, transparent);
+            animation: scan-line 2.4s ease-in-out infinite;
+            box-shadow: 0 0 8px 2px rgba(129,140,248,.5);
+            pointer-events: none;
+        }
+        /* Corner brackets */
+        .face-scan-corner {
+            position: absolute;
+            width: 24px; height: 24px;
+            border-color: #818cf8;
+            border-style: solid;
+            animation: corner-pulse 2s ease-in-out infinite;
+        }
+        .face-scan-corner.tl { top:8px; left:8px; border-width:3px 0 0 3px; border-radius:4px 0 0 0; }
+        .face-scan-corner.tr { top:8px; right:8px; border-width:3px 3px 0 0; border-radius:0 4px 0 0; animation-delay:.5s; }
+        .face-scan-corner.bl { bottom:8px; left:8px; border-width:0 0 3px 3px; border-radius:0 0 0 4px; animation-delay:1s; }
+        .face-scan-corner.br { bottom:8px; right:8px; border-width:0 3px 3px 0; border-radius:0 0 4px 0; animation-delay:1.5s; }
+
+        /* Fingerprint / face-ID icon (mobile) */
+        .bio-fp-icon {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#1e1b4b,#312e81);
+            border: 2px solid rgba(129,140,248,.3);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .bio-fp-ring {
+            position: absolute; inset: -12px;
+            border-radius: 50%;
+            border: 2px solid rgba(129,140,248,.3);
+            animation: pulse-ring 2s cubic-bezier(.4,0,.6,1) infinite;
+        }
+
+        /* Spinner */
+        .bio-spinner {
+            width: 32px; height: 32px;
+            border: 3px solid rgba(129,140,248,.2);
+            border-top-color: #818cf8;
+            border-radius: 50%;
+            animation: spinner-ring .8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        /* Status pill */
+        .bio-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .bio-status.idle   { background:rgba(129,140,248,.1); color:#a5b4fc; border:1px solid rgba(129,140,248,.2); }
+        .bio-status.ok     { background:rgba(52,211,153,.1);  color:#6ee7b7; border:1px solid rgba(52,211,153,.2); }
+        .bio-status.err    { background:rgba(239,68,68,.1);   color:#fca5a5; border:1px solid rgba(239,68,68,.2); }
+        .bio-status.scanning { background:rgba(250,204,21,.08); color:#fde68a; border:1px solid rgba(250,204,21,.15); }
+
+        /* Enroll password input inside modal */
+        .bio-input {
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+            box-sizing: border-box;
+        }
+        .bio-input:focus { border-color: rgba(129,140,248,.6); }
+        .bio-input::placeholder { color: rgba(255,255,255,.3); }
+
+        .bio-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .bio-btn-primary { background: linear-gradient(135deg,#6366f1,#818cf8); color:#fff; }
+        .bio-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+        .bio-btn-ghost { background: rgba(255,255,255,.05); color: rgba(255,255,255,.6); margin-top: 10px; }
+        .bio-btn-ghost:hover { background: rgba(255,255,255,.1); }
     </style>
 </head>
 
@@ -334,8 +484,105 @@
             </div>
         </div>
 
-        <!-- Secret hint (invisible) -->
+        <!-- Tap hint (invisible by default) -->
         <div class="offline-tap-hint" id="offline-tap-hint">·</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- FACE RECOGNITION MODAL  (Desktop / Large Screens)  -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="bio-modal-overlay" id="face-modal">
+        <div class="bio-modal-box">
+            <!-- Close -->
+            <button onclick="closeFaceModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+
+            <h2 style="color:#fff;font-size:18px;font-weight:800;margin:0 0 4px;">Face Recognition</h2>
+            <p style="color:rgba(255,255,255,.45);font-size:13px;margin:0 0 20px;">Owner access — look straight at the camera</p>
+
+            <!-- Camera ring -->
+            <div class="face-scan-wrap" id="face-scan-wrap">
+                <video id="face-video" autoplay muted playsinline></video>
+                <canvas class="face-overlay" id="face-canvas"></canvas>
+                <div class="face-scan-line" id="face-scan-line"></div>
+                <div class="face-scan-corner tl"></div>
+                <div class="face-scan-corner tr"></div>
+                <div class="face-scan-corner bl"></div>
+                <div class="face-scan-corner br"></div>
+            </div>
+
+            <!-- Status -->
+            <div class="bio-status idle" id="face-status">
+                <span id="face-status-dot" style="width:8px;height:8px;border-radius:50%;background:currentColor;"></span>
+                <span id="face-status-text">Starting camera…</span>
+            </div>
+
+            <!-- Enroll sub-form (hidden until first-time setup) -->
+            <div id="face-enroll-area" style="display:none;">
+                <p style="color:rgba(255,255,255,.55);font-size:12px;margin:0 0 10px;">First-time setup: confirm your owner password to register your face.</p>
+                <input type="password" id="face-enroll-pass" class="bio-input" placeholder="Enter owner password" autocomplete="current-password">
+                <div style="margin-top:14px;">
+                    <button class="bio-btn bio-btn-primary" onclick="faceEnrollVerify()">Verify & Register Face</button>
+                    <button class="bio-btn bio-btn-ghost" onclick="closeFaceModal()">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Normal auth footer -->
+            <div id="face-auth-footer">
+                <button class="bio-btn bio-btn-ghost" onclick="closeFaceModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MOBILE BIOMETRIC MODAL  (Small Screens)            -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="bio-modal-overlay" id="mobile-bio-modal">
+        <div class="bio-modal-box">
+            <!-- Close -->
+            <button onclick="closeMobileBioModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+
+            <!-- Icon -->
+            <div class="bio-fp-icon" id="bio-fp-icon">
+                <div class="bio-fp-ring"></div>
+                <!-- Fingerprint SVG -->
+                <svg id="bio-fp-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+                    <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+                    <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+                    <path d="M2 12a10 10 0 0 1 18-6"/>
+                    <path d="M2 17c1 .5 3.5 1 8 1"/>
+                    <path d="M20 12c0 1.71-.4 4.72-1.5 6"/>
+                    <path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+                </svg>
+            </div>
+
+            <h2 style="color:#fff;font-size:18px;font-weight:800;margin:0 0 6px;">Biometric Access</h2>
+            <p style="color:rgba(255,255,255,.45);font-size:13px;margin:0 0 20px;" id="bio-mobile-subtitle">Use your fingerprint or Face ID to unlock owner access</p>
+
+            <!-- Status -->
+            <div class="bio-status idle" id="bio-mobile-status" style="margin-bottom:20px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:currentColor;"></span>
+                <span id="bio-mobile-status-text">Ready</span>
+            </div>
+
+            <!-- Enroll area (first-time) -->
+            <div id="bio-mobile-enroll-area" style="display:none;">
+                <p style="color:rgba(255,255,255,.55);font-size:12px;margin:0 0 10px;">First-time setup: confirm owner password to register your biometric.</p>
+                <input type="password" id="bio-enroll-pass" class="bio-input" placeholder="Enter owner password" autocomplete="current-password">
+                <div style="margin-top:14px;">
+                    <button class="bio-btn bio-btn-primary" onclick="mobileBioEnrollVerify()">Verify & Register</button>
+                    <button class="bio-btn bio-btn-ghost" onclick="closeMobileBioModal()">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Normal auth area -->
+            <div id="bio-mobile-auth-area">
+                <button class="bio-btn bio-btn-primary" id="bio-launch-btn" onclick="launchWebAuthn()">
+                    Use Fingerprint / Face ID
+                </button>
+                <button class="bio-btn bio-btn-ghost" onclick="closeMobileBioModal()">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Container -->
@@ -476,49 +723,339 @@
             window.location.href = 'dashboard.html';
         }
 
-        // ── System Status Check ──────────────────────────────
-        // After Firebase loads, we check config/festData.isActive.
-        // If false → show the offline screen and hide the login card.
-        // Owner can secretly access login by clicking the icon 5 times.
-        var _offlineTapCount = 0;
-        var _offlineTapTimer = null;
+        // ══════════════════════════════════════════════════════
+        // SYSTEM STATUS + BIOMETRIC OWNER AUTH
+        // ══════════════════════════════════════════════════════
 
         function showOfflineScreen(festName) {
-            var screen = document.getElementById('system-offline-screen');
-            var loginCard = document.getElementById('login-container');
             if (festName) document.getElementById('offline-fest-name').innerText = festName;
-            screen.classList.add('show');
-            loginCard.style.display = 'none';
+            document.getElementById('system-offline-screen').classList.add('show');
+            document.getElementById('login-container').style.display = 'none';
         }
 
         function hideOfflineScreen() {
-            var screen = document.getElementById('system-offline-screen');
-            var loginCard = document.getElementById('login-container');
-            screen.classList.remove('show');
-            loginCard.style.display = '';
+            document.getElementById('system-offline-screen').classList.remove('show');
+            document.getElementById('login-container').style.display = '';
         }
 
+        // ── Entry: tap the offline icon ─────────────────────────
         function handleOfflineTap() {
-            _offlineTapCount++;
-            var hint = document.getElementById('offline-tap-hint');
-
-            // Show subtle dot progress
-            var dots = '';
-            for (var i = 0; i < 5; i++) {
-                dots += i < _offlineTapCount ? '●' : '○';
+            const isSmall = window.innerWidth < 1024;
+            if (isSmall) {
+                openMobileBioModal();
+            } else {
+                openFaceModal();
             }
-            if (hint) hint.innerText = dots;
+        }
 
-            clearTimeout(_offlineTapTimer);
-            _offlineTapTimer = setTimeout(function() {
-                _offlineTapCount = 0;
-                if (hint) hint.innerText = '·';
-            }, 2000);
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  DESKTOP  —  face-api.js Face Recognition           ║
+        // ╚══════════════════════════════════════════════════════╝
+        let _faceStream = null;
+        let _faceDetectLoop = null;
+        let _faceModelsLoaded = false;
+        let _faceMode = 'auth'; // 'auth' | 'enroll'
+        let _faceEnrollReady = false; // face detected & waiting to capture
 
-            if (_offlineTapCount >= 5) {
-                _offlineTapCount = 0;
-                if (hint) hint.innerText = '·';
-                hideOfflineScreen();
+        function setFaceStatus(msg, type = 'idle') {
+            const el = document.getElementById('face-status');
+            const txt = document.getElementById('face-status-text');
+            if (!el || !txt) return;
+            el.className = 'bio-status ' + type;
+            txt.innerText = msg;
+        }
+
+        async function openFaceModal() {
+            const modal = document.getElementById('face-modal');
+            const enrollArea = document.getElementById('face-enroll-area');
+            const authFooter = document.getElementById('face-auth-footer');
+
+            const stored = localStorage.getItem('ownerFaceDescriptor');
+            _faceMode = stored ? 'auth' : 'enroll';
+            _faceEnrollReady = false;
+
+            if (_faceMode === 'enroll') {
+                enrollArea.style.display = 'block';
+                authFooter.style.display = 'none';
+                setFaceStatus('Look at camera, then enter password below', 'idle');
+            } else {
+                enrollArea.style.display = 'none';
+                authFooter.style.display = 'block';
+                setFaceStatus('Starting camera…', 'idle');
+            }
+
+            modal.classList.add('show');
+            await startCamera();
+        }
+
+        function closeFaceModal() {
+            document.getElementById('face-modal').classList.remove('show');
+            stopCamera();
+        }
+
+        async function startCamera() {
+            try {
+                _faceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                const vid = document.getElementById('face-video');
+                vid.srcObject = _faceStream;
+                await vid.play();
+                setFaceStatus('Loading AI models…', 'scanning');
+                await loadFaceApiModels();
+                setFaceStatus(_faceMode === 'auth' ? 'Scanning face…' : 'Look at camera', 'scanning');
+                startFaceDetection();
+            } catch (err) {
+                setFaceStatus('Camera error: ' + err.message, 'err');
+            }
+        }
+
+        function stopCamera() {
+            clearInterval(_faceDetectLoop);
+            _faceDetectLoop = null;
+            if (_faceStream) {
+                _faceStream.getTracks().forEach(t => t.stop());
+                _faceStream = null;
+            }
+        }
+
+        async function loadFaceApiModels() {
+            if (_faceModelsLoaded) return;
+            // Load face-api.js library then models
+            if (!window.faceapi) {
+                await new Promise((res, rej) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+                    s.onload = res; s.onerror = rej;
+                    document.head.appendChild(s);
+                });
+            }
+            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+            await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            ]);
+            _faceModelsLoaded = true;
+        }
+
+        function startFaceDetection() {
+            const vid = document.getElementById('face-video');
+            const canvas = document.getElementById('face-canvas');
+
+            _faceDetectLoop = setInterval(async () => {
+                if (!window.faceapi || !vid.videoWidth) return;
+                const displaySize = { width: vid.videoWidth, height: vid.videoHeight };
+                faceapi.matchDimensions(canvas, displaySize);
+
+                const detections = await faceapi
+                    .detectAllFaces(vid, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+                    .withFaceLandmarks()
+                    .withFaceDescriptors();
+
+                const resized = faceapi.resizeResults(detections, displaySize);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (detections.length > 0) {
+                    // Draw landmark dots
+                    resized.forEach(d => {
+                        const pts = d.landmarks.positions;
+                        ctx.fillStyle = 'rgba(129,140,248,.8)';
+                        pts.forEach(p => {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        });
+                    });
+
+                    if (_faceMode === 'auth') {
+                        // Compare with stored
+                        const stored = localStorage.getItem('ownerFaceDescriptor');
+                        if (stored) {
+                            const stored_desc = new Float32Array(JSON.parse(stored));
+                            const live_desc = detections[0].descriptor;
+                            const dist = faceapi.euclideanDistance(stored_desc, live_desc);
+                            if (dist < 0.5) {
+                                setFaceStatus('✓ Identity Confirmed', 'ok');
+                                clearInterval(_faceDetectLoop);
+                                _faceDetectLoop = null;
+                                setTimeout(() => { closeFaceModal(); hideOfflineScreen(); }, 700);
+                            } else {
+                                setFaceStatus('Scanning… keep looking', 'scanning');
+                            }
+                        }
+                    } else {
+                        // Enroll mode — mark ready
+                        _faceEnrollReady = true;
+                        _faceEnrollDescriptor = detections[0].descriptor;
+                        setFaceStatus('Face detected ✓ — enter password to enroll', 'ok');
+                    }
+                } else {
+                    _faceEnrollReady = false;
+                    setFaceStatus(_faceMode === 'auth' ? 'No face detected — look at camera' : 'Look at camera', 'idle');
+                }
+            }, 300);
+        }
+
+        async function faceEnrollVerify() {
+            if (!_faceEnrollReady || !_faceEnrollDescriptor) {
+                setFaceStatus('No face detected yet — look at camera first', 'err');
+                return;
+            }
+            const passInput = document.getElementById('face-enroll-pass');
+            const enteredPass = passInput.value.trim();
+            if (!enteredPass) return;
+
+            setFaceStatus('Verifying password…', 'scanning');
+
+            // Verify password against Firestore
+            try {
+                const db = firebase.firestore();
+                const doc = await db.collection('admin').doc('credentials').get();
+                const creds = doc.exists ? doc.data() : { password: '81119' };
+                if (enteredPass !== creds.password) {
+                    setFaceStatus('Wrong password. Try again.', 'err');
+                    passInput.value = '';
+                    return;
+                }
+                // Save face descriptor
+                localStorage.setItem('ownerFaceDescriptor', JSON.stringify(Array.from(_faceEnrollDescriptor)));
+                setFaceStatus('✓ Face enrolled successfully!', 'ok');
+                setTimeout(() => { closeFaceModal(); hideOfflineScreen(); }, 900);
+            } catch (err) {
+                setFaceStatus('Error verifying. Check connection.', 'err');
+            }
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  MOBILE  —  WebAuthn (Fingerprint / Face ID)        ║
+        // ╚══════════════════════════════════════════════════════╝
+        function setMobileBioStatus(msg, type = 'idle') {
+            const el = document.getElementById('bio-mobile-status');
+            const txt = document.getElementById('bio-mobile-status-text');
+            if (!el || !txt) return;
+            el.className = 'bio-status ' + type;
+            txt.innerText = msg;
+        }
+
+        function openMobileBioModal() {
+            const modal = document.getElementById('mobile-bio-modal');
+            const enrollArea = document.getElementById('bio-mobile-enroll-area');
+            const authArea = document.getElementById('bio-mobile-auth-area');
+            const subtitle = document.getElementById('bio-mobile-subtitle');
+
+            if (!window.PublicKeyCredential) {
+                // WebAuthn not supported — show a friendly note
+                setMobileBioStatus('Biometrics not supported on this browser', 'err');
+                modal.classList.add('show');
+                authArea.style.display = 'none';
+                enrollArea.style.display = 'none';
+                return;
+            }
+
+            const credId = localStorage.getItem('ownerWebAuthnCredId');
+            if (!credId) {
+                // First time — show enrollment
+                enrollArea.style.display = 'block';
+                authArea.style.display = 'none';
+                subtitle.innerText = 'First-time setup: register your biometric';
+                setMobileBioStatus('Enrollment required', 'idle');
+            } else {
+                enrollArea.style.display = 'none';
+                authArea.style.display = 'block';
+                subtitle.innerText = 'Use your fingerprint or Face ID to unlock';
+                setMobileBioStatus('Ready', 'idle');
+            }
+            modal.classList.add('show');
+        }
+
+        function closeMobileBioModal() {
+            document.getElementById('mobile-bio-modal').classList.remove('show');
+        }
+
+        async function mobileBioEnrollVerify() {
+            const passInput = document.getElementById('bio-enroll-pass');
+            const pass = passInput.value.trim();
+            if (!pass) return;
+            setMobileBioStatus('Verifying password…', 'scanning');
+
+            try {
+                const db = firebase.firestore();
+                const doc = await db.collection('admin').doc('credentials').get();
+                const creds = doc.exists ? doc.data() : { password: '81119' };
+                if (pass !== creds.password) {
+                    setMobileBioStatus('Wrong password. Try again.', 'err');
+                    passInput.value = '';
+                    return;
+                }
+                // Register WebAuthn credential
+                setMobileBioStatus('Registering biometric…', 'scanning');
+                await registerWebAuthn();
+            } catch (err) {
+                setMobileBioStatus('Error: ' + err.message, 'err');
+            }
+        }
+
+        async function registerWebAuthn() {
+            const challenge = crypto.getRandomValues(new Uint8Array(32));
+            const rpId = location.hostname || 'localhost';
+            try {
+                const cred = await navigator.credentials.create({
+                    publicKey: {
+                        challenge,
+                        rp: { id: rpId, name: 'FestOwner' },
+                        user: { id: new Uint8Array(16), name: 'owner', displayName: 'Owner' },
+                        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                        authenticatorSelection: { userVerification: 'required', authenticatorAttachment: 'platform' },
+                        timeout: 60000,
+                    }
+                });
+                // Store credential id (base64url)
+                const credIdB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)))
+                    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+                localStorage.setItem('ownerWebAuthnCredId', credIdB64);
+                setMobileBioStatus('✓ Biometric registered!', 'ok');
+                setTimeout(() => { closeMobileBioModal(); hideOfflineScreen(); }, 800);
+            } catch (err) {
+                if (err.name === 'NotAllowedError') {
+                    setMobileBioStatus('Permission denied. Try again.', 'err');
+                } else {
+                    setMobileBioStatus('Registration failed: ' + err.message, 'err');
+                }
+            }
+        }
+
+        async function launchWebAuthn() {
+            setMobileBioStatus('Waiting for biometric…', 'scanning');
+            document.getElementById('bio-launch-btn').disabled = true;
+            const credIdB64 = localStorage.getItem('ownerWebAuthnCredId');
+            if (!credIdB64) { openMobileBioModal(); return; }
+
+            // Decode base64url → ArrayBuffer
+            const b64 = credIdB64.replace(/-/g,'+').replace(/_/g,'/');
+            const bin = atob(b64);
+            const arr = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+
+            try {
+                const challenge = crypto.getRandomValues(new Uint8Array(32));
+                const assertion = await navigator.credentials.get({
+                    publicKey: {
+                        challenge,
+                        rpId: location.hostname || 'localhost',
+                        allowCredentials: [{ id: arr.buffer, type: 'public-key', transports: ['internal'] }],
+                        userVerification: 'required',
+                        timeout: 60000,
+                    }
+                });
+                if (assertion) {
+                    setMobileBioStatus('✓ Identity Verified', 'ok');
+                    setTimeout(() => { closeMobileBioModal(); hideOfflineScreen(); }, 600);
+                }
+            } catch (err) {
+                setMobileBioStatus(err.name === 'NotAllowedError' ? 'Auth cancelled. Tap to retry.' : 'Failed: ' + err.message, 'err');
+            } finally {
+                const btn = document.getElementById('bio-launch-btn');
+                if (btn) btn.disabled = false;
             }
         }
 
