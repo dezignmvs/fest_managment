@@ -81,6 +81,69 @@
                 transform: scale(1) translateY(0);
             }
         }
+
+        /* ── PIN pad ── */
+        @keyframes pin-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .pin-dot { width:14px;height:14px;border-radius:50%;background:#e5e7eb;transition:background .15s,transform .15s; }
+        .pin-dot.filled { background:#134E8E;transform:scale(1.15); }
+        .pin-key { width:68px;height:58px;border-radius:14px;background:#f9fafb;border:1px solid #e5e7eb;font-size:20px;font-weight:700;color:#111827;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;user-select:none; }
+        .pin-key:hover { background:#f3f4f6;border-color:#d1d5db; }
+        .pin-key:active { transform:scale(.94);background:#e5e7eb; }
+        .pin-key.del { background:#fff0f0;border-color:#fecaca;color:#ef4444; }
+        .pin-key.del:hover { background:#fee2e2; }
+
+        /* ── Bio Settings Drawer ── */
+        @keyframes bio-drawer-in { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        @keyframes scan-sweep { 0%{top:8%} 50%{top:88%} 100%{top:8%} }
+        @keyframes fp-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)} 50%{box-shadow:0 0 0 12px rgba(99,102,241,0)} }
+
+        #bio-settings-drawer {
+            position:fixed;top:0;right:0;height:100%;width:440px;max-width:100%;
+            background:#fff;z-index:10001;box-shadow:-20px 0 60px rgba(0,0,0,.12);
+            transform:translateX(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);
+            display:flex;flex-direction:column;
+        }
+        #bio-settings-drawer.open { transform:translateX(0); }
+        #bio-drawer-overlay { position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:10000;display:none;backdrop-filter:blur(2px); }
+        #bio-drawer-overlay.show { display:block; }
+
+        .bio-section-card {
+            border:1px solid #e5e7eb;border-radius:16px;padding:20px;
+            display:flex;flex-direction:column;gap:14px;
+        }
+        .bio-reg-btn {
+            display:flex;align-items:center;justify-content:center;gap:10px;
+            padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;
+            border:none;cursor:pointer;width:100%;transition:all .18s;
+        }
+        .bio-reg-btn.primary { background:linear-gradient(135deg,#134E8E,#1d6fb5);color:#fff; }
+        .bio-reg-btn.primary:hover { opacity:.9;transform:translateY(-1px); }
+        .bio-reg-btn.danger { background:#fff0f0;color:#ef4444;border:1px solid #fecaca; }
+        .bio-reg-btn.danger:hover { background:#fee2e2; }
+        .bio-reg-btn.secondary { background:#f3f4f6;color:#374151;border:1px solid #e5e7eb; }
+        .bio-reg-btn.secondary:hover { background:#e5e7eb; }
+        .bio-reg-btn:disabled { opacity:.5;cursor:not-allowed;transform:none; }
+
+        .bio-badge {
+            display:inline-flex;align-items:center;gap:6px;
+            padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;
+        }
+        .bio-badge.registered { background:#d1fae5;color:#065f46; }
+        .bio-badge.not-registered { background:#f3f4f6;color:#6b7280; }
+
+        /* Mini face preview */
+        .face-mini-ring {
+            width:120px;height:120px;border-radius:50%;overflow:hidden;background:#000;
+            border:2px solid #6366f1;margin:0 auto;position:relative;
+        }
+        .face-mini-ring video { width:100%;height:100%;object-fit:cover;transform:scaleX(-1); }
+        .face-mini-ring canvas { position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1); }
+        .face-mini-scanline {
+            position:absolute;left:0;right:0;height:2px;
+            background:linear-gradient(90deg,transparent,#818cf8,transparent);
+            animation:scan-sweep 2s ease-in-out infinite;
+            pointer-events:none;
+        }
     </style>
 </head>
 
@@ -273,7 +336,18 @@
                     </div>
                     <span class="text-[13px] font-semibold">Access Tokens</span>
                 </a>
-            </div>
+
+                <!-- SECURITY menu item (owner-only biometric setup) -->
+                <div class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-5 mb-2">Security</div>
+                <a href="#" onclick="event.preventDefault(); openPinModal();"
+                    class="flex items-center gap-3 px-4 py-2.5 mb-1 rounded-xl text-brand-textMuted hover:bg-purple-50 hover:text-purple-700 group transition-all">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent group-hover:bg-white group-hover:shadow-md transition-all">
+                        <i class="fi fi-rr-fingerprint text-lg group-hover:text-purple-600"></i>
+                    </div>
+                    <span class="text-[13px] font-semibold">Biometric Setup</span>
+                </a>
+
+            </div><!-- end flex-1 nav -->
 
             <div class="p-4 border-t border-brand-border">
                 <a href="dashboard.html"
@@ -284,6 +358,184 @@
                 </a>
             </div>
         </aside>
+
+        <!-- ═════════════════════════════════════ -->
+        <!-- PIN LOCK MODAL                            -->
+        <!-- ═════════════════════════════════════ -->
+        <div id="pin-modal-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div id="pin-modal-box" class="bg-white rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,.18)] border border-gray-100 p-8 w-full max-w-[340px] text-center">
+
+                <!-- Icon -->
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-blue to-blue-700 flex items-center justify-center mx-auto mb-5 shadow-lg">
+                    <i class="fi fi-rr-lock text-white text-2xl"></i>
+                </div>
+
+                <h2 class="text-[18px] font-black text-gray-900 mb-1">Security Access</h2>
+                <p class="text-[12px] text-gray-400 mb-6">Enter owner PIN to continue</p>
+
+                <!-- PIN dots -->
+                <div class="flex items-center justify-center gap-3 mb-8" id="pin-dots">
+                    <div class="pin-dot" id="pd0"></div>
+                    <div class="pin-dot" id="pd1"></div>
+                    <div class="pin-dot" id="pd2"></div>
+                    <div class="pin-dot" id="pd3"></div>
+                    <div class="pin-dot" id="pd4"></div>
+                </div>
+
+                <!-- Error msg -->
+                <p id="pin-error" class="text-[12px] text-red-500 font-semibold mb-4 hidden">Incorrect PIN. Try again.</p>
+
+                <!-- Number grid -->
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <button class="pin-key" onclick="pinPress('1')">1</button>
+                    <button class="pin-key" onclick="pinPress('2')">2</button>
+                    <button class="pin-key" onclick="pinPress('3')">3</button>
+                    <button class="pin-key" onclick="pinPress('4')">4</button>
+                    <button class="pin-key" onclick="pinPress('5')">5</button>
+                    <button class="pin-key" onclick="pinPress('6')">6</button>
+                    <button class="pin-key" onclick="pinPress('7')">7</button>
+                    <button class="pin-key" onclick="pinPress('8')">8</button>
+                    <button class="pin-key" onclick="pinPress('9')">9</button>
+                    <div></div><!-- spacer -->
+                    <button class="pin-key" onclick="pinPress('0')">0</button>
+                    <button class="pin-key del" onclick="pinDelete()">
+                        <i class="fi fi-rr-delete text-[16px]"></i>
+                    </button>
+                </div>
+
+                <button onclick="closePinModal()" class="mt-3 text-[12px] text-gray-400 hover:text-gray-700 font-semibold transition-colors">Cancel</button>
+            </div>
+        </div>
+
+        <!-- ═════════════════════════════════════ -->
+        <!-- BIOMETRIC SETTINGS DRAWER (right side)    -->
+        <!-- ═════════════════════════════════════ -->
+        <div id="bio-drawer-overlay" onclick="closeBioDrawer()"></div>
+        <div id="bio-settings-drawer">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div>
+                    <h2 class="text-[18px] font-black text-gray-900">Biometric Setup</h2>
+                    <p class="text-[12px] text-gray-400 mt-0.5">Register face & fingerprint for quick owner access</p>
+                </div>
+                <button onclick="closeBioDrawer()" class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors">
+                    <i class="fi fi-rr-cross text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable body -->
+            <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+
+                <!-- ── Face Recognition Section ── -->
+                <div class="bio-section-card">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                <i class="fi fi-rr-face-viewfinder text-indigo-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-bold text-gray-900">Face Recognition</div>
+                                <div class="text-[11px] text-gray-400">Desktop unlock via real-time face scan</div>
+                            </div>
+                        </div>
+                        <span id="face-reg-badge" class="bio-badge not-registered">Not Registered</span>
+                    </div>
+
+                    <!-- Mini camera preview (hidden until enrolling) -->
+                    <div id="face-cam-wrap" class="hidden flex-col items-center gap-3">
+                        <div class="face-mini-ring">
+                            <video id="bio-face-video" autoplay muted playsinline></video>
+                            <canvas id="bio-face-canvas"></canvas>
+                            <div class="face-mini-scanline"></div>
+                        </div>
+                        <div id="bio-face-status" class="text-[12px] font-semibold text-indigo-600">Loading models…</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2" id="face-action-area">
+                        <button class="bio-reg-btn primary" id="btn-face-start" onclick="bioStartFaceEnroll()">
+                            <i class="fi fi-rr-face-viewfinder"></i>
+                            Register Face
+                        </button>
+                        <button class="bio-reg-btn danger hidden" id="btn-face-clear" onclick="bioClearFace()">
+                            <i class="fi fi-rr-trash"></i>
+                            Remove Registered Face
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Fingerprint / WebAuthn Section ── -->
+                <div class="bio-section-card">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                                <i class="fi fi-rr-fingerprint text-purple-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-bold text-gray-900">Fingerprint / Face ID</div>
+                                <div class="text-[11px] text-gray-400">Mobile unlock via device biometric</div>
+                            </div>
+                        </div>
+                        <span id="fp-reg-badge" class="bio-badge not-registered">Not Registered</span>
+                    </div>
+
+                    <p class="text-[12px] text-gray-500 bg-purple-50/60 rounded-xl p-3 border border-purple-100">
+                        Uses your device’s built-in fingerprint reader or Face ID (WebAuthn). Works on mobile & modern laptops.
+                    </p>
+
+                    <div id="fp-status-msg" class="hidden text-[12px] font-semibold text-center py-2"></div>
+
+                    <div class="flex flex-col gap-2">
+                        <button class="bio-reg-btn primary" id="btn-fp-register" onclick="bioRegisterFingerprint()">
+                            <i class="fi fi-rr-fingerprint"></i>
+                            Register Fingerprint / Face ID
+                        </button>
+                        <button class="bio-reg-btn danger hidden" id="btn-fp-clear" onclick="bioClearFingerprint()">
+                            <i class="fi fi-rr-trash"></i>
+                            Remove Registration
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Additional Options ── -->
+                <div class="bio-section-card">
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
+                            <i class="fi fi-rr-settings text-gray-500 text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="text-[14px] font-bold text-gray-900">Additional Options</div>
+                            <div class="text-[11px] text-gray-400">Manage & reset biometric data</div>
+                        </div>
+                    </div>
+
+                    <button class="bio-reg-btn secondary" onclick="bioShowInfo()">
+                        <i class="fi fi-rr-info"></i>
+                        View Registration Info
+                    </button>
+                    <button class="bio-reg-btn danger" onclick="bioClearAll()">
+                        <i class="fi fi-rr-shield-exclamation"></i>
+                        Clear All Biometric Data
+                    </button>
+                </div>
+
+                <!-- Info card (hidden by default) -->
+                <div id="bio-info-card" class="hidden border border-gray-200 rounded-2xl p-4 bg-gray-50/50 text-[12px] text-gray-600 space-y-2">
+                    <div class="font-bold text-gray-800 mb-2">Registration Status</div>
+                    <div class="flex justify-between"><span>Face (Desktop)</span><span id="info-face-val" class="font-bold text-gray-900">—</span></div>
+                    <div class="flex justify-between"><span>Fingerprint (Mobile)</span><span id="info-fp-val" class="font-bold text-gray-900">—</span></div>
+                    <div class="flex justify-between"><span>Device / Browser</span><span class="font-bold text-gray-900" id="info-browser">—</span></div>
+                </div>
+
+            </div><!-- end scrollable body -->
+
+            <!-- Footer -->
+            <div class="p-5 border-t border-gray-100 bg-gray-50/50">
+                <p class="text-[11px] text-gray-400 text-center">
+                    Biometric data is stored locally on this device and never sent to any server.
+                </p>
+            </div>
+        </div>
 
         <main class="flex-1 flex flex-col h-full overflow-hidden">
 
@@ -3454,6 +3706,329 @@
             previewJsb();
             loadJudgeSheetTemplate();
         }, 1500);
+
+        // ═══════════════════════════════════════════════════════════
+        // PIN LOCK  ➜  BIOMETRIC SETTINGS DRAWER
+        // ═══════════════════════════════════════════════════════════
+
+        const OWNER_PIN = '81119';
+        let _pinBuffer = '';
+
+        // \u2500\u2500 PIN Modal \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        function openPinModal() {
+            _pinBuffer = '';
+            updatePinDots();
+            document.getElementById('pin-error').classList.add('hidden');
+            document.getElementById('pin-modal-overlay').classList.remove('hidden');
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal-overlay').classList.add('hidden');
+            _pinBuffer = '';
+            updatePinDots();
+        }
+
+        function pinPress(digit) {
+            if (_pinBuffer.length >= OWNER_PIN.length) return;
+            _pinBuffer += digit;
+            updatePinDots();
+            document.getElementById('pin-error').classList.add('hidden');
+
+            if (_pinBuffer.length === OWNER_PIN.length) {
+                checkPin();
+            }
+        }
+
+        function pinDelete() {
+            _pinBuffer = _pinBuffer.slice(0, -1);
+            updatePinDots();
+            document.getElementById('pin-error').classList.add('hidden');
+        }
+
+        function updatePinDots() {
+            for (let i = 0; i < OWNER_PIN.length; i++) {
+                const dot = document.getElementById('pd' + i);
+                if (dot) {
+                    dot.classList.toggle('filled', i < _pinBuffer.length);
+                }
+            }
+        }
+
+        function checkPin() {
+            if (_pinBuffer === OWNER_PIN) {
+                // Correct \u2014 close modal, open drawer
+                document.getElementById('pin-modal-overlay').classList.add('hidden');
+                setTimeout(() => openBioDrawer(), 120);
+            } else {
+                // Wrong \u2014 shake + reset
+                const box = document.getElementById('pin-modal-box');
+                box.style.animation = 'pin-shake .5s ease';
+                box.addEventListener('animationend', () => box.style.animation = '', { once: true });
+                document.getElementById('pin-error').classList.remove('hidden');
+                setTimeout(() => {
+                    _pinBuffer = '';
+                    updatePinDots();
+                }, 600);
+            }
+        }
+
+        // \u2500\u2500 Biometric Drawer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        function openBioDrawer() {
+            updateBioDrawerBadges();
+            document.getElementById('bio-drawer-overlay').classList.add('show');
+            document.getElementById('bio-settings-drawer').classList.add('open');
+        }
+
+        function closeBioDrawer() {
+            document.getElementById('bio-drawer-overlay').classList.remove('show');
+            document.getElementById('bio-settings-drawer').classList.remove('open');
+            // Stop camera if running
+            stopBioCamera();
+            document.getElementById('face-cam-wrap').classList.add('hidden');
+            document.getElementById('face-cam-wrap').classList.remove('flex');
+            document.getElementById('btn-face-start').disabled = false;
+        }
+
+        function updateBioDrawerBadges() {
+            const hasFace = !!localStorage.getItem('ownerFaceDescriptor');
+            const hasFp   = !!localStorage.getItem('ownerWebAuthnCredId');
+
+            const faceBadge = document.getElementById('face-reg-badge');
+            if (faceBadge) {
+                faceBadge.textContent = hasFace ? '\u2713 Registered' : 'Not Registered';
+                faceBadge.className = 'bio-badge ' + (hasFace ? 'registered' : 'not-registered');
+            }
+            const fpBadge = document.getElementById('fp-reg-badge');
+            if (fpBadge) {
+                fpBadge.textContent = hasFp ? '\u2713 Registered' : 'Not Registered';
+                fpBadge.className = 'bio-badge ' + (hasFp ? 'registered' : 'not-registered');
+            }
+
+            // Show/hide clear buttons
+            const btnFaceClear = document.getElementById('btn-face-clear');
+            const btnFaceStart = document.getElementById('btn-face-start');
+            if (btnFaceClear) btnFaceClear.classList.toggle('hidden', !hasFace);
+            if (btnFaceStart) btnFaceStart.textContent = hasFace ? '\u{1F4F7} Re-Register Face' : '\u{1F4F7} Register Face';
+
+            const btnFpClear = document.getElementById('btn-fp-clear');
+            if (btnFpClear) btnFpClear.classList.toggle('hidden', !hasFp);
+        }
+
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        // FACE REGISTRATION (drawer mini-camera)
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        let _bioFaceStream = null;
+        let _bioFaceLoop   = null;
+        let _bioFaceModels = false;
+
+        function setBioFaceStatus(msg, color = 'text-indigo-600') {
+            const el = document.getElementById('bio-face-status');
+            if (el) { el.textContent = msg; el.className = 'text-[12px] font-semibold ' + color; }
+        }
+
+        async function bioStartFaceEnroll() {
+            const camWrap = document.getElementById('face-cam-wrap');
+            const btnStart = document.getElementById('btn-face-start');
+            camWrap.classList.remove('hidden');
+            camWrap.classList.add('flex');
+            btnStart.disabled = true;
+            setBioFaceStatus('Starting camera\u2026');
+
+            try {
+                _bioFaceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320 } });
+                const vid = document.getElementById('bio-face-video');
+                vid.srcObject = _bioFaceStream;
+                await vid.play();
+
+                setBioFaceStatus('Loading AI models\u2026');
+                await _loadBioFaceModels();
+                setBioFaceStatus('Look at the camera\u2026');
+                _startBioFaceLoop();
+            } catch (err) {
+                setBioFaceStatus('Error: ' + err.message, 'text-red-500');
+                btnStart.disabled = false;
+            }
+        }
+
+        async function _loadBioFaceModels() {
+            if (_bioFaceModels) return;
+            if (!window.faceapi) {
+                await new Promise((res, rej) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+                    s.onload = res; s.onerror = rej;
+                    document.head.appendChild(s);
+                });
+            }
+            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+            await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            ]);
+            _bioFaceModels = true;
+        }
+
+        function _startBioFaceLoop() {
+            const vid = document.getElementById('bio-face-video');
+            const canvas = document.getElementById('bio-face-canvas');
+
+            _bioFaceLoop = setInterval(async () => {
+                if (!window.faceapi || !vid.videoWidth) return;
+                const size = { width: vid.videoWidth, height: vid.videoHeight };
+                faceapi.matchDimensions(canvas, size);
+
+                const detections = await faceapi
+                    .detectAllFaces(vid, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+                    .withFaceLandmarks()
+                    .withFaceDescriptors();
+
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (detections.length > 0) {
+                    // Draw dots
+                    const resized = faceapi.resizeResults(detections, size);
+                    ctx.fillStyle = 'rgba(99,102,241,.7)';
+                    resized[0].landmarks.positions.forEach(p => {
+                        ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill();
+                    });
+
+                    // Save descriptor \u2014 auto-capture after 1 good frame
+                    clearInterval(_bioFaceLoop);
+                    _bioFaceLoop = null;
+                    const descriptor = detections[0].descriptor;
+                    localStorage.setItem('ownerFaceDescriptor', JSON.stringify(Array.from(descriptor)));
+                    setBioFaceStatus('\u2713 Face registered successfully!', 'text-green-600');
+                    stopBioCamera();
+
+                    // Hide camera, update UI
+                    setTimeout(() => {
+                        document.getElementById('face-cam-wrap').classList.add('hidden');
+                        document.getElementById('face-cam-wrap').classList.remove('flex');
+                        document.getElementById('btn-face-start').disabled = false;
+                        updateBioDrawerBadges();
+                        showToast('<b>\u2705</b> Face registered! You can now unlock via face recognition.');
+                    }, 1000);
+                } else {
+                    setBioFaceStatus('Position your face in the circle\u2026');
+                }
+            }, 400);
+        }
+
+        function stopBioCamera() {
+            clearInterval(_bioFaceLoop);
+            _bioFaceLoop = null;
+            if (_bioFaceStream) {
+                _bioFaceStream.getTracks().forEach(t => t.stop());
+                _bioFaceStream = null;
+            }
+        }
+
+        function bioClearFace() {
+            if (!confirm('Remove registered face data?')) return;
+            localStorage.removeItem('ownerFaceDescriptor');
+            stopBioCamera();
+            document.getElementById('face-cam-wrap').classList.add('hidden');
+            document.getElementById('face-cam-wrap').classList.remove('flex');
+            document.getElementById('btn-face-start').disabled = false;
+            updateBioDrawerBadges();
+            showToast('<b>\ud83d\uddd1\ufe0f</b> Face data removed.');
+        }
+
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        // FINGERPRINT / WEBAUTHN REGISTRATION
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        function setFpStatus(msg, color = 'text-purple-600') {
+            const el = document.getElementById('fp-status-msg');
+            if (!el) return;
+            el.textContent = msg;
+            el.className = 'text-[12px] font-semibold text-center py-2 ' + color;
+            el.classList.remove('hidden');
+        }
+
+        async function bioRegisterFingerprint() {
+            if (!window.PublicKeyCredential) {
+                setFpStatus('WebAuthn not supported on this browser.', 'text-red-500');
+                return;
+            }
+            const btn = document.getElementById('btn-fp-register');
+            btn.disabled = true;
+            setFpStatus('Waiting for biometric prompt\u2026');
+
+            const challenge = crypto.getRandomValues(new Uint8Array(32));
+            const rpId = location.hostname || 'localhost';
+
+            try {
+                const cred = await navigator.credentials.create({
+                    publicKey: {
+                        challenge,
+                        rp: { id: rpId, name: 'FestOwner' },
+                        user: { id: new Uint8Array(16), name: 'owner', displayName: 'Owner' },
+                        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                        authenticatorSelection: { userVerification: 'required', authenticatorAttachment: 'platform' },
+                        timeout: 60000,
+                    }
+                });
+                const credIdB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)))
+                    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+                localStorage.setItem('ownerWebAuthnCredId', credIdB64);
+                setFpStatus('\u2713 Fingerprint / Face ID registered!', 'text-green-600');
+                updateBioDrawerBadges();
+                showToast('<b>\u2705</b> Biometric registered! Mobile unlock is now active.');
+            } catch (err) {
+                const msg = err.name === 'NotAllowedError' ? 'Permission denied. Try again.' : err.message;
+                setFpStatus(msg, 'text-red-500');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function bioClearFingerprint() {
+            if (!confirm('Remove fingerprint/Face ID registration?')) return;
+            localStorage.removeItem('ownerWebAuthnCredId');
+            document.getElementById('fp-status-msg').classList.add('hidden');
+            updateBioDrawerBadges();
+            showToast('<b>\ud83d\uddd1\ufe0f</b> Fingerprint data removed.');
+        }
+
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        // ADDITIONAL OPTIONS
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        function bioShowInfo() {
+            const card = document.getElementById('bio-info-card');
+            card.classList.toggle('hidden');
+            if (!card.classList.contains('hidden')) {
+                document.getElementById('info-face-val').textContent =
+                    localStorage.getItem('ownerFaceDescriptor') ? '\u2713 Registered' : 'Not Registered';
+                document.getElementById('info-fp-val').textContent =
+                    localStorage.getItem('ownerWebAuthnCredId') ? '\u2713 Registered' : 'Not Registered';
+                document.getElementById('info-browser').textContent =
+                    (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['Unknown'])[0];
+            }
+        }
+
+        function bioClearAll() {
+            if (!confirm('Clear ALL biometric data (face + fingerprint)? This cannot be undone.')) return;
+            localStorage.removeItem('ownerFaceDescriptor');
+            localStorage.removeItem('ownerWebAuthnCredId');
+            stopBioCamera();
+            document.getElementById('face-cam-wrap').classList.add('hidden');
+            document.getElementById('face-cam-wrap').classList.remove('flex');
+            document.getElementById('btn-face-start').disabled = false;
+            document.getElementById('fp-status-msg').classList.add('hidden');
+            document.getElementById('bio-info-card').classList.add('hidden');
+            updateBioDrawerBadges();
+            showToast('<b>\ud83d\uddd1\ufe0f</b> All biometric data cleared.');
+        }
+
+        // Keyboard support for PIN
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('pin-modal-overlay').classList.contains('hidden')) return;
+            if (/^[0-9]$/.test(e.key)) pinPress(e.key);
+            if (e.key === 'Backspace') pinDelete();
+            if (e.key === 'Escape') closePinModal();
+        });
 
     </script>
 </body>

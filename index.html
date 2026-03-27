@@ -516,17 +516,13 @@
                 <span id="face-status-text">Starting camera…</span>
             </div>
 
-            <!-- Enroll sub-form (hidden until first-time setup) -->
-            <div id="face-enroll-area" style="display:none;">
-                <p style="color:rgba(255,255,255,.55);font-size:12px;margin:0 0 10px;">First-time setup: confirm your owner password to register your face.</p>
-                <input type="password" id="face-enroll-pass" class="bio-input" placeholder="Enter owner password" autocomplete="current-password">
-                <div style="margin-top:14px;">
-                    <button class="bio-btn bio-btn-primary" onclick="faceEnrollVerify()">Verify & Register Face</button>
-                    <button class="bio-btn bio-btn-ghost" onclick="closeFaceModal()">Cancel</button>
-                </div>
+            <!-- Not registered notice (shown if no face data found) -->
+            <div id="face-not-registered" style="display:none;text-align:center;padding:10px 0;">
+                <p style="color:rgba(255,255,255,.5);font-size:12px;margin:0 0 10px;">No face registered on this device.</p>
+                <a href="innerDashboard.html" style="color:#818cf8;font-size:12px;font-weight:700;text-decoration:none;">⚙️ Register in Security Settings</a>
             </div>
 
-            <!-- Normal auth footer -->
+            <!-- Footer -->
             <div id="face-auth-footer">
                 <button class="bio-btn bio-btn-ghost" onclick="closeFaceModal()">Cancel</button>
             </div>
@@ -565,17 +561,13 @@
                 <span id="bio-mobile-status-text">Ready</span>
             </div>
 
-            <!-- Enroll area (first-time) -->
-            <div id="bio-mobile-enroll-area" style="display:none;">
-                <p style="color:rgba(255,255,255,.55);font-size:12px;margin:0 0 10px;">First-time setup: confirm owner password to register your biometric.</p>
-                <input type="password" id="bio-enroll-pass" class="bio-input" placeholder="Enter owner password" autocomplete="current-password">
-                <div style="margin-top:14px;">
-                    <button class="bio-btn bio-btn-primary" onclick="mobileBioEnrollVerify()">Verify & Register</button>
-                    <button class="bio-btn bio-btn-ghost" onclick="closeMobileBioModal()">Cancel</button>
-                </div>
+            <!-- Not registered notice -->
+            <div id="bio-mobile-not-registered" style="display:none;text-align:center;padding:8px 0 16px;">
+                <p style="color:rgba(255,255,255,.5);font-size:12px;margin:0 0 10px;">No biometric registered on this device.</p>
+                <a href="innerDashboard.html" style="color:#818cf8;font-size:12px;font-weight:700;text-decoration:none;">⚙️ Register in Security Settings</a>
             </div>
 
-            <!-- Normal auth area -->
+            <!-- Auth area -->
             <div id="bio-mobile-auth-area">
                 <button class="bio-btn bio-btn-primary" id="bio-launch-btn" onclick="launchWebAuthn()">
                     Use Fingerprint / Face ID
@@ -749,13 +741,11 @@
         }
 
         // ╔══════════════════════════════════════════════════════╗
-        // ║  DESKTOP  —  face-api.js Face Recognition           ║
+        // ║  DESKTOP  —  face-api.js Face Recognition (SCAN)   ║
         // ╚══════════════════════════════════════════════════════╝
         let _faceStream = null;
         let _faceDetectLoop = null;
         let _faceModelsLoaded = false;
-        let _faceMode = 'auth'; // 'auth' | 'enroll'
-        let _faceEnrollReady = false; // face detected & waiting to capture
 
         function setFaceStatus(msg, type = 'idle') {
             const el = document.getElementById('face-status');
@@ -767,23 +757,23 @@
 
         async function openFaceModal() {
             const modal = document.getElementById('face-modal');
-            const enrollArea = document.getElementById('face-enroll-area');
+            const notReg = document.getElementById('face-not-registered');
             const authFooter = document.getElementById('face-auth-footer');
 
             const stored = localStorage.getItem('ownerFaceDescriptor');
-            _faceMode = stored ? 'auth' : 'enroll';
-            _faceEnrollReady = false;
+            notReg.style.display = 'none';
+            authFooter.style.display = 'block';
 
-            if (_faceMode === 'enroll') {
-                enrollArea.style.display = 'block';
+            if (!stored) {
+                // No face registered — show hint, don't start camera
+                notReg.style.display = 'block';
                 authFooter.style.display = 'none';
-                setFaceStatus('Look at camera, then enter password below', 'idle');
-            } else {
-                enrollArea.style.display = 'none';
-                authFooter.style.display = 'block';
-                setFaceStatus('Starting camera…', 'idle');
+                setFaceStatus('No face registered on this device.', 'err');
+                modal.classList.add('show');
+                return;
             }
 
+            setFaceStatus('Starting camera…', 'idle');
             modal.classList.add('show');
             await startCamera();
         }
@@ -801,7 +791,7 @@
                 await vid.play();
                 setFaceStatus('Loading AI models…', 'scanning');
                 await loadFaceApiModels();
-                setFaceStatus(_faceMode === 'auth' ? 'Scanning face…' : 'Look at camera', 'scanning');
+                setFaceStatus('Scanning face…', 'scanning');
                 startFaceDetection();
             } catch (err) {
                 setFaceStatus('Camera error: ' + err.message, 'err');
@@ -819,7 +809,6 @@
 
         async function loadFaceApiModels() {
             if (_faceModelsLoaded) return;
-            // Load face-api.js library then models
             if (!window.faceapi) {
                 await new Promise((res, rej) => {
                     const s = document.createElement('script');
@@ -840,6 +829,9 @@
         function startFaceDetection() {
             const vid = document.getElementById('face-video');
             const canvas = document.getElementById('face-canvas');
+            const stored = localStorage.getItem('ownerFaceDescriptor');
+            if (!stored) { setFaceStatus('No face data found.', 'err'); return; }
+            const storedDesc = new Float32Array(JSON.parse(stored));
 
             _faceDetectLoop = setInterval(async () => {
                 if (!window.faceapi || !vid.videoWidth) return;
@@ -867,67 +859,24 @@
                         });
                     });
 
-                    if (_faceMode === 'auth') {
-                        // Compare with stored
-                        const stored = localStorage.getItem('ownerFaceDescriptor');
-                        if (stored) {
-                            const stored_desc = new Float32Array(JSON.parse(stored));
-                            const live_desc = detections[0].descriptor;
-                            const dist = faceapi.euclideanDistance(stored_desc, live_desc);
-                            if (dist < 0.5) {
-                                setFaceStatus('✓ Identity Confirmed', 'ok');
-                                clearInterval(_faceDetectLoop);
-                                _faceDetectLoop = null;
-                                setTimeout(() => { closeFaceModal(); hideOfflineScreen(); }, 700);
-                            } else {
-                                setFaceStatus('Scanning… keep looking', 'scanning');
-                            }
-                        }
+                    // Compare with stored descriptor
+                    const dist = faceapi.euclideanDistance(storedDesc, detections[0].descriptor);
+                    if (dist < 0.5) {
+                        setFaceStatus('✓ Identity Confirmed', 'ok');
+                        clearInterval(_faceDetectLoop);
+                        _faceDetectLoop = null;
+                        setTimeout(() => { closeFaceModal(); hideOfflineScreen(); }, 700);
                     } else {
-                        // Enroll mode — mark ready
-                        _faceEnrollReady = true;
-                        _faceEnrollDescriptor = detections[0].descriptor;
-                        setFaceStatus('Face detected ✓ — enter password to enroll', 'ok');
+                        setFaceStatus('Scanning… keep looking', 'scanning');
                     }
                 } else {
-                    _faceEnrollReady = false;
-                    setFaceStatus(_faceMode === 'auth' ? 'No face detected — look at camera' : 'Look at camera', 'idle');
+                    setFaceStatus('No face detected — look at camera', 'idle');
                 }
             }, 300);
         }
 
-        async function faceEnrollVerify() {
-            if (!_faceEnrollReady || !_faceEnrollDescriptor) {
-                setFaceStatus('No face detected yet — look at camera first', 'err');
-                return;
-            }
-            const passInput = document.getElementById('face-enroll-pass');
-            const enteredPass = passInput.value.trim();
-            if (!enteredPass) return;
-
-            setFaceStatus('Verifying password…', 'scanning');
-
-            // Verify password against Firestore
-            try {
-                const db = firebase.firestore();
-                const doc = await db.collection('admin').doc('credentials').get();
-                const creds = doc.exists ? doc.data() : { password: '81119' };
-                if (enteredPass !== creds.password) {
-                    setFaceStatus('Wrong password. Try again.', 'err');
-                    passInput.value = '';
-                    return;
-                }
-                // Save face descriptor
-                localStorage.setItem('ownerFaceDescriptor', JSON.stringify(Array.from(_faceEnrollDescriptor)));
-                setFaceStatus('✓ Face enrolled successfully!', 'ok');
-                setTimeout(() => { closeFaceModal(); hideOfflineScreen(); }, 900);
-            } catch (err) {
-                setFaceStatus('Error verifying. Check connection.', 'err');
-            }
-        }
-
         // ╔══════════════════════════════════════════════════════╗
-        // ║  MOBILE  —  WebAuthn (Fingerprint / Face ID)        ║
+        // ║  MOBILE  —  WebAuthn (Fingerprint / Face ID) SCAN  ║
         // ╚══════════════════════════════════════════════════════╝
         function setMobileBioStatus(msg, type = 'idle') {
             const el = document.getElementById('bio-mobile-status');
@@ -939,28 +888,28 @@
 
         function openMobileBioModal() {
             const modal = document.getElementById('mobile-bio-modal');
-            const enrollArea = document.getElementById('bio-mobile-enroll-area');
+            const notReg = document.getElementById('bio-mobile-not-registered');
             const authArea = document.getElementById('bio-mobile-auth-area');
             const subtitle = document.getElementById('bio-mobile-subtitle');
 
             if (!window.PublicKeyCredential) {
-                // WebAuthn not supported — show a friendly note
                 setMobileBioStatus('Biometrics not supported on this browser', 'err');
-                modal.classList.add('show');
+                notReg.style.display = 'block';
                 authArea.style.display = 'none';
-                enrollArea.style.display = 'none';
+                modal.classList.add('show');
                 return;
             }
 
             const credId = localStorage.getItem('ownerWebAuthnCredId');
+            notReg.style.display = 'none';
+
             if (!credId) {
-                // First time — show enrollment
-                enrollArea.style.display = 'block';
+                // Not registered → show hint
+                notReg.style.display = 'block';
                 authArea.style.display = 'none';
-                subtitle.innerText = 'First-time setup: register your biometric';
-                setMobileBioStatus('Enrollment required', 'idle');
+                subtitle.innerText = 'No biometric registered on this device';
+                setMobileBioStatus('Register in Security Settings first', 'err');
             } else {
-                enrollArea.style.display = 'none';
                 authArea.style.display = 'block';
                 subtitle.innerText = 'Use your fingerprint or Face ID to unlock';
                 setMobileBioStatus('Ready', 'idle');
@@ -970,58 +919,6 @@
 
         function closeMobileBioModal() {
             document.getElementById('mobile-bio-modal').classList.remove('show');
-        }
-
-        async function mobileBioEnrollVerify() {
-            const passInput = document.getElementById('bio-enroll-pass');
-            const pass = passInput.value.trim();
-            if (!pass) return;
-            setMobileBioStatus('Verifying password…', 'scanning');
-
-            try {
-                const db = firebase.firestore();
-                const doc = await db.collection('admin').doc('credentials').get();
-                const creds = doc.exists ? doc.data() : { password: '81119' };
-                if (pass !== creds.password) {
-                    setMobileBioStatus('Wrong password. Try again.', 'err');
-                    passInput.value = '';
-                    return;
-                }
-                // Register WebAuthn credential
-                setMobileBioStatus('Registering biometric…', 'scanning');
-                await registerWebAuthn();
-            } catch (err) {
-                setMobileBioStatus('Error: ' + err.message, 'err');
-            }
-        }
-
-        async function registerWebAuthn() {
-            const challenge = crypto.getRandomValues(new Uint8Array(32));
-            const rpId = location.hostname || 'localhost';
-            try {
-                const cred = await navigator.credentials.create({
-                    publicKey: {
-                        challenge,
-                        rp: { id: rpId, name: 'FestOwner' },
-                        user: { id: new Uint8Array(16), name: 'owner', displayName: 'Owner' },
-                        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-                        authenticatorSelection: { userVerification: 'required', authenticatorAttachment: 'platform' },
-                        timeout: 60000,
-                    }
-                });
-                // Store credential id (base64url)
-                const credIdB64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)))
-                    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-                localStorage.setItem('ownerWebAuthnCredId', credIdB64);
-                setMobileBioStatus('✓ Biometric registered!', 'ok');
-                setTimeout(() => { closeMobileBioModal(); hideOfflineScreen(); }, 800);
-            } catch (err) {
-                if (err.name === 'NotAllowedError') {
-                    setMobileBioStatus('Permission denied. Try again.', 'err');
-                } else {
-                    setMobileBioStatus('Registration failed: ' + err.message, 'err');
-                }
-            }
         }
 
         async function launchWebAuthn() {
