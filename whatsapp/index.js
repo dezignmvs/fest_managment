@@ -19,9 +19,19 @@ let lastQr = '';
 let isReady = false;
 
 // Initialize Firebase Admin
-const serviceAccount = require('./serviceAccount.json');
+let serviceAccount;
+try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    } else {
+        serviceAccount = require('./serviceAccount.json');
+    }
+} catch (error) {
+    console.error("Error loading Firebase credentials. Please ensure FIREBASE_SERVICE_ACCOUNT environment variable is set correctly or serviceAccount.json exists.");
+    console.error(error);
+}
 
-if (!admin.apps.length) {
+if (serviceAccount && !admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
