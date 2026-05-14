@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtFest'26 Login UI</title>
+
+    <!-- Favicon / PWA Setup -->
+    <link rel="icon" href="logo-512.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="logo-192.svg">
+    <meta name="theme-color" content="#134E8E">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Flaticon Uicons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+
+    <!-- Toastify CSS for React-Hot-Toast style -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Tailwind Configuration with Image Palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        palette: {
+                            blue: '#134E8E',
+                            red: '#C00707',
+                            orange: '#FF4400',
+                            yellow: '#FFB33F',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Animated Checkbox CSS -->
+    <style>
+        .check {
+            cursor: pointer;
+            position: relative;
+            margin: 0;
+            width: 18px;
+            height: 18px;
+            -webkit-tap-highlight-color: transparent;
+            transform: translate3d(0, 0, 0);
+            display: inline-block;
+        }
+
+        .check:before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(19, 78, 142, 0.08);
+            /* #134E8E in RGB */
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .check svg {
+            position: relative;
+            z-index: 1;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke: #c8ccd4;
+            stroke-width: 1.5;
+            transform: translate3d(0, 0, 0);
+            transition: all 0.2s ease;
+        }
+
+        .check svg path {
+            stroke-dasharray: 60;
+            stroke-dashoffset: 0;
+        }
+
+        .check svg polyline {
+            stroke-dasharray: 22;
+            stroke-dashoffset: 66;
+        }
+
+        .check:hover:before {
+            opacity: 1;
+        }
+
+        .check:hover svg {
+            stroke: #134E8E;
+        }
+
+        #cbx2:checked+.check svg {
+            stroke: #134E8E;
+        }
+
+        #cbx2:checked+.check svg path {
+            stroke-dashoffset: 60;
+            transition: all 0.3s linear;
+        }
+
+        #cbx2:checked+.check svg polyline {
+            stroke-dashoffset: 42;
+            transition: all 0.2s linear;
+            transition-delay: 0.15s;
+        }
+
+        /* ── System Offline Screen ── */
+        @keyframes float-slow { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-18px)} }
+        @keyframes pulse-ring { 0%{transform:scale(1);opacity:.6} 70%{transform:scale(1.6);opacity:0} 100%{transform:scale(1.6);opacity:0} }
+        @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.2} }
+        @keyframes slide-up { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes orbit { from{transform:rotate(0deg) translateX(54px) rotate(0deg)} to{transform:rotate(360deg) translateX(54px) rotate(-360deg)} }
+
+        #system-offline-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+            overflow: hidden;
+        }
+
+        #system-offline-screen.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .offline-bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .offline-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .offline-icon-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 32px;
+        }
+
+        .offline-icon-wrap .pulse-ring {
+            position: absolute;
+            inset: -16px;
+            border-radius: 50%;
+            border: 2px solid rgba(239,68,68,.4);
+            animation: pulse-ring 2s cubic-bezier(.4,0,.6,1) infinite;
+        }
+
+        .offline-icon-wrap .pulse-ring:nth-child(2) { animation-delay: .6s; }
+        .offline-icon-wrap .main-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border-radius: 50%;
+            border: 2px solid rgba(239,68,68,.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            animation: float-slow 4s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(239,68,68,.15), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+
+        .offline-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink-dot 1.4s ease-in-out infinite; }
+        .offline-dot:nth-child(2) { animation-delay:.2s; }
+        .offline-dot:nth-child(3) { animation-delay:.4s; }
+
+        .offline-card {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            animation: slide-up .6s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        .offline-error-code {
+            font-size: clamp(90px, 20vw, 140px);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -4px;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 40%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: .18;
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .offline-orbit-wrap {
+            position: absolute;
+            inset: -40px;
+            pointer-events: none;
+        }
+        .offline-orbit-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin: -4px;
+            animation: orbit 6s linear infinite;
+        }
+        .offline-orbit-dot:nth-child(2) { width:6px;height:6px;margin:-3px; animation-delay:-2s; animation-duration:8s; }
+        .offline-orbit-dot:nth-child(3) { width:5px;height:5px;margin:-2.5px; animation-delay:-4s; animation-duration:10s; }
+
+        .offline-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(239,68,68,.08);
+            border: 1px solid rgba(239,68,68,.2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            width: fit-content;
+            margin: 0 auto 24px;
+        }
+
+        .offline-tap-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255,255,255,.12);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        /* ── Security Lock Modal ── */
+        @keyframes scan-line { 0%{top:8%} 50%{top:88%} 100%{top:8%} }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        @keyframes bio-slide-up { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+        .security-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(8,8,20,.95);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+        }
+        .security-modal-overlay.show { display: flex; }
+
+        .security-modal-box {
+            background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
+            border: 1px solid rgba(129,140,248,.2);
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            max-width: 380px;
+            width: calc(100% - 32px);
+            text-align: center;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,.6);
+            animation: bio-slide-up .4s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        .scan-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            background: rgba(129,140,248,.1);
+            border: 2px solid rgba(129,140,248,.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .scan-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #818cf8, #6366f1, #818cf8, transparent);
+            box-shadow: 0 0 10px 2px rgba(129,140,248,.6);
+            pointer-events: none;
+            display: none;
+        }
+        .animate-scan-line {
+            display: block;
+            animation: scan-line 1.5s ease-in-out infinite;
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .security-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+            transition: all .2s;
+            margin-bottom: 20px;
+        }
+        .security-input:focus { border-color: #818cf8; background: rgba(255,255,255,.08); }
+
+        .security-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg,#6366f1,#818cf8);
+            color: #fff;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .security-btn:hover { opacity: .9; transform: translateY(-1px); }
+        .security-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 sm:p-8 font-sans">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- SYSTEM OFFLINE / MAINTENANCE SCREEN             -->
+    <!-- Hidden by default; shown when isActive = false  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="system-offline-screen">
+        <!-- Background -->
+        <div class="offline-bg-grid"></div>
+        <div class="offline-orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 70%);top:-80px;left:-120px;"></div>
+        <div class="offline-orb" style="width:320px;height:320px;background:radial-gradient(circle,rgba(239,68,68,.12),transparent 70%);bottom:-60px;right:-80px;"></div>
+
+        <!-- Content card -->
+        <div class="offline-card">
+
+            <!-- Faint 404 behind everything -->
+            <div class="offline-error-code">404</div>
+
+            <!-- Animated icon -->
+            <div class="offline-icon-wrap">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+
+                <!-- Secret: click logo 5× to show login -->
+                <div id="offline-logo-btn" class="main-icon" title="" onclick="handleOfflineTap()" style="cursor:default;">
+                    <!-- Orbiting dots -->
+                    <div class="offline-orbit-wrap">
+                        <div class="offline-orbit-dot" style="background:#818cf8;"></div>
+                        <div class="offline-orbit-dot" style="background:#6366f1;"></div>
+                        <div class="offline-orbit-dot" style="background:#ef4444;"></div>
+                    </div>
+                    <!-- Icon inside -->
+                    <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Status badge -->
+            <div class="offline-status-bar">
+                <div class="offline-dot"></div>
+                <div class="offline-dot"></div>
+                <div class="offline-dot"></div>
+                <span style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:.08em;text-transform:uppercase;">System Offline</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#fff;margin:0 0 12px;line-height:1.2;letter-spacing:-.5px;">
+                We'll be back soon
+            </h1>
+
+            <!-- Sub text -->
+            <p style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;margin:0 0 32px;max-width:340px;margin-left:auto;margin-right:auto;">
+                The system is currently undergoing scheduled maintenance. We apologise for the inconvenience and will be online shortly.
+            </p>
+
+            <!-- Info pills -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);">Access Restricted</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);" id="offline-fest-name">ArtFest'26</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tap hint (invisible by default) -->
+        <div class="offline-tap-hint" id="offline-tap-hint">·</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- SECURITY LOCK MODAL                             -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="security-modal-overlay" id="security-lock-modal">
+        <div class="security-modal-box">
+            <button onclick="closeSecurityModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+
+            <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 4px;">Security Bypass</h2>
+            <p style="color:rgba(255,255,255,.45);font-size:13px;margin:0 0 24px;">Owner authorization required</p>
+
+            <div class="scan-wrap" id="scan-wrap">
+                <i class="fi fi-rr-fingerprint text-4xl text-indigo-400" id="scan-icon"></i>
+                <div class="scan-line" id="modal-scan-line"></div>
+            </div>
+
+            <div id="security-actions">
+                <input type="password" id="securityPasscode" onkeydown="if(event.key==='Enter')handlePasscodeUnlock()" class="security-input" placeholder="Enter Passcode">
+                
+                <button id="btn-security-unlock" onclick="handlePasscodeUnlock()" class="security-btn">
+                    <i class="fi fi-rr-shield-check text-lg"></i> Verify Identity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container -->
+    <div id="login-container"
+        class="bg-white rounded-[2rem] shadow-xl flex flex-col lg:flex-row w-full max-w-[750px] p-2 border border-gray-100 overflow-hidden relative">
+
+        <!-- LEFT SECTION -->
+        <div
+            class="hidden lg:flex bg-palette-blue rounded-[1.5rem] px-6 lg:px-8 py-12 lg:w-[45%] flex-col justify-center gap-10 relative overflow-hidden text-center z-10 shadow-inner">
+
+            <!-- Background Decorations -->
+            <div class="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+            <div class="absolute bottom-10 -right-10 w-48 h-48 bg-black/20 rounded-full blur-md pointer-events-none">
+            </div>
+            <div class="absolute top-1/2 left-0 w-24 h-24 bg-palette-yellow/10 rounded-full pointer-events-none"></div>
+
+            <!-- Logo Pill -->
+            <div
+                class="mx-auto flex items-center justify-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm py-2 px-5 rounded-full w-max relative z-20">
+                <div class="bg-white/20 rounded p-1 flex items-center justify-center overflow-hidden">
+                    <img id="login-logo-desktop" src="logo-512.svg" class="w-6 h-6 object-contain" alt="Logo">
+                </div>
+                <span class="fest-name-display text-white font-bold text-lg tracking-wide">ArtFest'26</span>
+            </div>
+
+            <!-- Features with Palette Colors & Flaticons -->
+            <div class="space-y-3 relative z-20">
+                <div
+                    class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 transition-colors">
+                    <div class="bg-palette-red p-2.5 rounded-lg flex items-center justify-center">
+                        <i class="fi fi-rr-users text-white text-base leading-none"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white text-[13px] font-semibold">Candidate Management</h3>
+                        <p class="text-blue-200 text-[10px] opacity-80">Register & track participants</p>
+                    </div>
+                </div>
+
+                <div
+                    class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 transition-colors">
+                    <div class="bg-palette-orange p-2.5 rounded-lg flex items-center justify-center">
+                        <i class="fi fi-rr-trophy text-white text-base leading-none"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white text-[13px] font-semibold">Results & Awards</h3>
+                        <p class="text-blue-200 text-[10px] opacity-80">Publish results instantly</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION (FORM) -->
+        <div
+            class="px-6 py-8 sm:px-8 lg:px-10 w-full lg:w-[55%] flex flex-col justify-center bg-white rounded-[1.5rem]">
+
+            <!-- Mobile Logo Backup -->
+            <div class="lg:hidden flex justify-center mb-6">
+                <div class="flex items-center gap-2 bg-palette-blue py-2 px-6 rounded-full shadow-sm">
+                    <div class="bg-white/20 rounded p-1 flex items-center justify-center overflow-hidden">
+                        <img id="login-logo-mobile" src="logo-512.svg" class="w-6 h-6 object-contain" alt="Logo">
+                    </div>
+                    <span class="fest-name-display text-white font-bold text-lg tracking-wide">ArtFest'26</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
+                <p class="text-sm text-gray-500 mt-1">Please enter your details to sign in.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="loginForm" class="space-y-5 w-full max-w-[340px] mx-auto">
+
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-xs font-semibold text-gray-700 mb-1.5">User name</label>
+                    <input type="text" id="username" placeholder="Enter your user name"
+                        class="w-full px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-palette-blue/40 focus:border-palette-blue transition-all text-sm text-gray-800 placeholder-gray-400">
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" placeholder="Enter your password"
+                            class="w-full px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-palette-blue/40 focus:border-palette-blue transition-all text-sm text-gray-800 placeholder-gray-400 pr-10">
+
+                        <button type="button" onclick="togglePassword()"
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-palette-blue transition-colors cursor-pointer outline-none">
+                            <i id="eye-icon" class="fi fi-rr-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center mt-2">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="cbx2" style="display: none;">
+                        <label for="cbx2" class="check">
+                            <svg width="16px" height="16px" viewBox="0 0 18 18">
+                                <path
+                                    d="M 1 9 L 1 9 c 0 -5 3 -8 8 -8 L 9 1 C 14 1 17 5 17 9 L 17 9 c 0 4 -4 8 -8 8 L 9 17 C 5 17 1 14 1 9 L 1 9 Z">
+                                </path>
+                                <polyline points="1 9 7 14 15 4"></polyline>
+                            </svg>
+                        </label>
+                        <label for="cbx2"
+                            class="text-xs text-gray-600 font-medium cursor-pointer select-none hover:text-gray-900 transition">Remember
+                            me</label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full flex justify-center items-center gap-2 bg-palette-blue hover:opacity-90 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-[2px] shadow-md hover:shadow-lg hover:shadow-palette-blue/40 text-sm mt-6">
+                    <i class="fi fi-rr-sign-in-alt text-[15px]"></i>
+                    Sign In
+                </button>
+
+
+
+            </form>
+        </div>
+    </div><!-- end #login-container -->
+
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- Toggle Password Script & Login Logic -->
+    <script>
+        // Check if already logged in
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            const role = localStorage.getItem('userRole');
+            if (role === 'Media' || role === 'media') {
+                window.location.href = 'mediaDashboard.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // ══════════════════════════════════════════════════════
+        // SYSTEM STATUS + BIOMETRIC OWNER AUTH
+        // ══════════════════════════════════════════════════════
+
+        function showOfflineScreen(festName) {
+            if (festName) document.getElementById('offline-fest-name').innerText = festName;
+            document.getElementById('system-offline-screen').classList.add('show');
+            document.getElementById('login-container').style.display = 'none';
+        }
+
+        function hideOfflineScreen() {
+            document.getElementById('system-offline-screen').classList.remove('show');
+            document.getElementById('login-container').style.display = '';
+        }
+
+        // Handle "Remember Me" on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const rememberedUser = localStorage.getItem('rememberedUsername');
+            if (rememberedUser) {
+                document.getElementById('username').value = rememberedUser;
+                document.getElementById('cbx2').checked = true;
+            }
+        });
+
+        function handleOfflineTap() {
+            const modal = document.getElementById('security-lock-modal');
+            document.getElementById('securityPasscode').value = '';
+            modal.classList.add('show');
+            setTimeout(() => document.getElementById('securityPasscode').focus(), 100);
+        }
+
+        function closeSecurityModal() {
+            document.getElementById('security-lock-modal').classList.remove('show');
+        }
+
+        async function handlePasscodeUnlock() {
+            const passcodeField = document.getElementById('securityPasscode');
+            const pass = passcodeField.value;
+            
+            if (pass === 'Suhail@340') {
+                const btn = document.getElementById('btn-security-unlock');
+                const scanLine = document.getElementById('modal-scan-line');
+                const icon = document.getElementById('scan-icon');
+                const wrap = document.getElementById('scan-wrap');
+
+                // Start Scanning Animation
+                passcodeField.blur();
+                passcodeField.disabled = true;
+                btn.disabled = true;
+                
+                // Animate Icon & Line
+                icon.className = 'fi fi-rr-fingerprint text-4xl text-blue-500 animate-pulse';
+                scanLine.classList.add('animate-scan-line');
+                wrap.classList.add('border-blue-500/50', 'bg-blue-500/10');
+
+                setTimeout(() => {
+                    showToast("<b>✅</b> Unlocked successfully!");
+                    closeSecurityModal();
+                    hideOfflineScreen();
+                }, 2000);
+            } else {
+                showToast("<b>❌</b> Incorrect passcode.");
+                passcodeField.value = '';
+                passcodeField.focus();
+                
+                // Shake effect
+                passcodeField.classList.add('animate-shake');
+                setTimeout(() => {
+                    passcodeField.classList.remove('animate-shake');
+                }, 400);
+            }
+        }
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKA0k_9UgoJX_RBgEsIeNdiW2w0Okko1o",
+            authDomain: "festie-s1u2h3.firebaseapp.com",
+            projectId: "festie-s1u2h3",
+            storageBucket: "festie-s1u2h3.firebasestorage.app",
+            messagingSenderId: "794049194885",
+            appId: "1:794049194885:web:8f75f0df4c15cde15eb2ec",
+            measurementId: "G-P2TS8F6LLJ"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        firebase.firestore().settings({ experimentalForceLongPolling: true });
+
+        // Listen for Firestore DB changes for Fest Data + System Status
+        firebase.firestore().collection('config').doc('festData').onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                const festName = (data && data.name) ? data.name : 'Festival';
+
+                // Update fest name everywhere
+                document.querySelectorAll('.fest-name-display').forEach(el => {
+                    el.innerText = festName;
+                });
+                document.title = festName + " Login";
+
+                // Update logos
+                const logo = data.logo512 || data.logo502 || data.logo192 || data.logo;
+                if (logo) {
+                    ['login-logo-desktop', 'login-logo-mobile'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.src = logo;
+                    });
+                }
+
+                // ── System Status Gate ──────────────────────────────────
+                if (data && data.isActive === false) {
+                    showOfflineScreen(festName);
+                } else {
+                    var screen = document.getElementById('system-offline-screen');
+                    if (screen && screen.classList.contains('show')) {
+                        hideOfflineScreen();
+                    }
+                }
+            }
+        }, err => {
+            console.warn("Fest config sync error:", err);
+        });
+
+        // --- Connectivity Monitoring ---
+        window.addEventListener('online', () => {
+            showToast("<b>✅</b> Connection restored.");
+        });
+
+        window.addEventListener('offline', () => {
+            showToast("<b>⚠️</b> You are currently offline.");
+        });
+
+        // React-hot-toast style toast using Toastify
+        function showToast(message) {
+            Toastify({
+                text: message,
+                duration: 2000,
+                gravity: "top",
+                position: "center",
+                style: {
+                    background: "#ffffff",
+                    color: "#333",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                    borderRadius: "8px",
+                    border: "1px solid #eaeaea",
+                    padding: "12px 24px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    fontFamily: "'Inter', sans-serif"
+                },
+                escapeMarkup: false
+            }).showToast();
+        }
+
+        const loginBtn = document.querySelector('#loginForm button[type="submit"]');
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            // Loading state
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div> Signing in...';
+            loginBtn.disabled = true;
+
+            const resetBtn = () => {
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            };
+
+            const handleRememberMe = (username) => {
+                if (document.getElementById('cbx2').checked) {
+                    localStorage.setItem('rememberedUsername', username);
+                } else {
+                    localStorage.removeItem('rememberedUsername');
+                }
+            };
+
+            const fallbackLogin = () => {
+                if (user === 'admin' && pass === '81119') {
+                    // Seed initial data to firestore so it isn't empty!
+                    firebase.firestore().collection('admin').doc('credentials').set({ username: 'admin', password: '81119', name: 'ArtFest' }).catch(() => { });
+                    firebase.firestore().collection('config').doc('festData').set({ name: 'ArtFest', isActive: true }).catch(() => { });
+
+                    showToast('<b>✅</b> Successfully logged in!');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    handleRememberMe(user);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    resetBtn();
+                    showToast('<b>❌</b> Invalid username or password!');
+                }
+            };
+
+            // ── Step 1: Check Owner (admin) credentials ──────────────────
+            const dbRef = firebase.firestore().collection('admin').doc('credentials');
+
+            dbRef.get().then((doc) => {
+                const creds = doc.exists ? doc.data() : null;
+                let validUser = 'admin';
+                let validPass = '81119';
+                if (creds) {
+                    validUser = creds.username;
+                    validPass = creds.password;
+                    console.log("Info: The credentials in Firestore are username: '" + validUser + "', password: '" + validPass + "'");
+                }
+
+                if ((user === validUser && pass === validPass) || (user === 'admin' && pass === '81119')) {
+                    // Owner login — always allowed
+                    if (!doc.exists) {
+                        dbRef.set({ username: 'admin', password: '81119', name: 'ArtFest' }).catch(() => { });
+                        firebase.firestore().collection('config').doc('festData').set({ name: 'ArtFest', isActive: true }).catch(() => { });
+                    }
+                    showToast('<b>✅</b> Successfully logged in!');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userRole', 'owner');
+                    localStorage.setItem('userManagement', 'true');
+                    localStorage.setItem('resultManagement', 'true');
+                    localStorage.setItem('semiOwner', 'true');
+                    const ownerName = doc.exists ? (doc.data().name || doc.data().username) : 'Suhail';
+                    localStorage.setItem('festUserName', ownerName);
+                    localStorage.setItem('festUserId', 'owner');
+                    handleRememberMe(user);
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                // ── Step 2: Check Fest Users (assigned roles) ─────────────
+                firebase.firestore().collection('festUsers')
+                    .where('username', '==', user)
+                    .where('password', '==', pass)
+                    .get()
+                    .then((snapshot) => {
+                        if (!snapshot.empty) {
+                            const festUserDoc = snapshot.docs[0];
+                            const festUser = festUserDoc.data();
+
+                            // ── Deactivation check ─────────────────────────────
+                            if (festUser.isActive === false) {
+                                resetBtn();
+                                showToast('<b>🚫</b> Your account has been deactivated. Please contact the owner.');
+                                return;
+                            }
+
+                              // Active fest user — allow login
+                            showToast('<b>✅</b> Successfully logged in!');
+                            localStorage.setItem('isLoggedIn', 'true');
+                            localStorage.setItem('userRole', festUser.role || 'user');
+                            localStorage.setItem('festUserId', festUserDoc.id);
+                            localStorage.setItem('festUserName', festUser.name || festUser.username);
+
+                            const perms = festUser.permissions || {};
+                            localStorage.setItem('userManagement', perms.userManagement ? 'true' : 'false');
+                            localStorage.setItem('resultManagement', perms.resultManagement ? 'true' : 'false');
+                            localStorage.setItem('semiOwner', perms.semiOwner ? 'true' : 'false');
+                            localStorage.setItem('innerDashboard', perms.innerDashboard ? 'true' : 'false');
+                            localStorage.setItem('blockAccess', perms.blockAccess ? 'true' : 'false');
+
+                            if (festUser.role === 'Team Manager') {
+                                localStorage.setItem('managerTeam', festUser.team || 'Unassigned');
+                            } else {
+                                localStorage.removeItem('managerTeam');
+                            }
+
+                            handleRememberMe(user);
+                            
+                            if (festUser.role === 'Media' || festUser.role === 'media') {
+                                window.location.href = 'mediaDashboard.html';
+                            } else {
+                                window.location.href = 'dashboard.html';
+                            }
+                        } else {
+                            resetBtn();
+                            showToast('<b>❌</b> Invalid username or password!');
+                        }
+                    })
+                    .catch((err) => {
+                        console.warn('Fest user lookup failed:', err);
+                        resetBtn();
+                        showToast('<b>❌</b> Invalid username or password!');
+                    });
+
+            }).catch(error => {
+                console.warn("Database unavailable, falling back to local auth.", error);
+                fallbackLogin();
+            });
+        });
+
+        // Enable ENTER key to submit form from inputs
+        document.querySelectorAll('#username, #password').forEach(input => {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    loginBtn.click();
+                }
+            });
+        });
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fi-rr-eye');
+                eyeIcon.classList.add('fi-rr-eye-crossed');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fi-rr-eye-crossed');
+                eyeIcon.classList.add('fi-rr-eye');
+            }
+        }
+    </script>
+
+    <!-- PWA Service Worker Registration & Install Logic -->
+    <script>
+        // Remove Service Worker completely to fix the hard-refresh issue
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                    console.log('Service Worker unregistered.');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
