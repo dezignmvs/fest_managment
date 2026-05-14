@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Draft Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="icon" type="image/svg+xml" href="logo-192.svg">
+    <link rel="apple-touch-icon" href="logo-512.svg">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            blue: '#134E8E',
+                            yellow: '#FFB33F',
+                            bg: '#f8f9fc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8f9fc; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .timer-ring { transition: stroke-dashoffset 1s linear; }
+        .team-pill { transition: all 0.2s ease; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+        .team-pill.current { box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor; transform: scale(1.08); font-size: 11px; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fade-in 0.3s ease forwards; }
+        .waiting-blur { backdrop-filter: blur(12px); background: rgba(248, 250, 252, 0.9); }
+        .selected-row { border-color: #134E8E; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans h-screen overflow-hidden flex flex-col">
+
+    <!-- Top Navigation -->
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shrink-0 z-30">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-brand-blue rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
+                <i class="fi fi-rr-apps text-lg"></i>
+            </div>
+            <div>
+                <h1 id="nav-auction-name" class="text-sm font-bold text-slate-800 uppercase tracking-tight">Draft Room</h1>
+                <p id="nav-team-name" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">...</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="localStorage.clear(); location.href='login.html'" class="text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-all flex items-center gap-2">
+                <i class="fi fi-rr-exit"></i> EXIT
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden p-6 relative">
+        <div class="max-w-7xl mx-auto h-full flex flex-col gap-6">
+            
+            <!-- Top Status Bar: Round Sequence -->
+            <div id="rounds-track" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-3 overflow-x-auto custom-scrollbar">
+                <!-- Rounds generated here -->
+            </div>
+
+            <!-- Draft Grid -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
+                
+                <!-- Left: Candidate Focus Card -->
+                <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-8 flex-1 flex flex-col items-center text-center">
+                        <!-- Timer -->
+                        <div id="timer-badge" class="px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded-full text-lg font-black mb-8 flex items-center gap-2">
+                            <i class="fi fi-rr-clock-three"></i>
+                            <span id="timer-display">01:00</span>
+                        </div>
+
+                        <!-- Profile Display -->
+                        <div class="relative w-48 h-48 mb-8">
+                            <div class="w-full h-full rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner">
+                                <img id="focus-photo" src="" class="w-full h-full object-cover hidden">
+                                <i id="focus-icon" class="fi fi-rr-user text-6xl text-slate-200"></i>
+                            </div>
+                            <div id="section-badge" class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-brand-blue text-white text-[10px] font-black rounded-full shadow-lg uppercase tracking-widest">
+                                ...
+                            </div>
+                        </div>
+
+                        <h2 id="focus-name" class="text-2xl font-black text-slate-800 mb-1 leading-tight tracking-tight">...</h2>
+                        <p id="focus-class" class="text-xs font-bold text-slate-400 uppercase tracking-widest">SELECT A CANDIDATE</p>
+                    </div>
+
+                    <!-- Confirm Selection Button -->
+                    <div class="p-6 bg-slate-50/50 border-t border-slate-100">
+                        <button id="btn-confirm" onclick="confirmDraft()" disabled
+                            class="w-full py-4 bg-slate-900 hover:bg-brand-blue text-white rounded-2xl font-black text-sm shadow-xl shadow-slate-200 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed transition-all active:scale-[0.98] uppercase tracking-widest">
+                            Confirm Selection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Candidate Selection Card -->
+                <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col relative">
+                    <!-- Search Header -->
+                    <div class="p-5 border-b border-slate-100 bg-white/80 backdrop-blur shrink-0">
+                        <div class="relative">
+                            <i class="fi fi-rr-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="student-search" oninput="filterStudents()" placeholder="Search candidates..."
+                                class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-blue/5 focus:bg-white transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Scrollable List -->
+                    <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                        <table class="w-full border-separate border-spacing-y-2">
+                            <tbody id="student-list" class="space-y-2">
+                                <!-- Candidates here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Waiting Overlay (Blurred) -->
+                    <div id="waiting-screen" class="absolute inset-0 z-20 waiting-blur flex-col items-center justify-center p-12 text-center hidden">
+                        <div class="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mb-6 animate-bounce">
+                            <i class="fi fi-rr-hourglass-end text-3xl text-brand-blue"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-slate-800 mb-2">Wait for your turn</h2>
+                        <p class="text-slate-500 font-medium mb-6">Currently picking: <span id="wait-team-badge" class="px-3 py-1 bg-brand-blue text-white text-[10px] font-bold rounded-full ml-2">...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Initial Setup Screen -->
+    <div id="setup-screen" class="fixed inset-0 z-50 bg-slate-50 flex items-center justify-center p-6" style="display:none;">
+        <div class="bg-white p-12 rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full text-center">
+            <div class="w-20 h-20 bg-brand-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-blue">
+                <i class="fi fi-rr-calendar-clock text-4xl"></i>
+            </div>
+            <h1 id="session-title" class="text-3xl font-black text-slate-900 mb-2">Draft Room</h1>
+            <p class="text-slate-500 font-medium mb-8 uppercase tracking-widest text-[10px]">Session has not started yet</p>
+            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8 animate-pulse">
+                <p class="text-slate-400 font-bold text-sm">WAITING FOR ADMIN...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-white/60 backdrop-blur-md flex flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-brand-blue/20 border-t-brand-blue rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black text-brand-blue uppercase tracking-[0.2em] animate-pulse">Syncing Draft...</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKA0k_9UgoJX_RBgEsIeNdiW2w0Okko1o",
+            authDomain: "festie-s1u2h3.firebaseapp.com",
+            projectId: "festie-s1u2h3",
+            storageBucket: "festie-s1u2h3.firebasestorage.app",
+            messagingSenderId: "794049194885",
+            appId: "1:794049194885:web:8f75f0df4c15cde15eb2ec"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const auctionId = localStorage.getItem('auctionId');
+        const myTeamId  = localStorage.getItem('auctionTeamId');
+        const myTeamName = localStorage.getItem('auctionTeamName');
+
+        const userRole = localStorage.getItem('userRole');
+        const isAdmin = (userRole === 'Admin' || userRole === 'owner') && !myTeamId;
+
+        if (!auctionId) window.location.href = 'login.html';
+        if (!myTeamId && !isAdmin) window.location.href = 'login.html';
+
+        let auctionData  = null;
+        let candidates   = [];
+        let selectedId   = null;
+        let timerInterval = null;
+        let timerSecondsLeft = 60;
+
+        document.getElementById('nav-team-name').innerText = isAdmin ? `VIEW ONLY (${userRole})` : (myTeamName || '');
+        if (isAdmin) {
+            document.getElementById('btn-confirm')?.parentElement?.classList.add('hidden');
+            document.getElementById('waiting-screen')?.classList.add('hidden');
+            
+            const searchInput = document.getElementById('student-search');
+            if (searchInput) {
+                searchInput.disabled = true;
+                searchInput.placeholder = "View Only Mode";
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function showToast(msg, color='#134E8E') {
+            Toastify({ text: msg, duration: 2500, gravity: "top", position: "center",
+                style: { background: color, color: '#fff', borderRadius: '16px', fontWeight: '700', fontFamily: 'Inter' }
+            }).showToast();
+        }
+
+        db.collection('auctions').doc(auctionId).onSnapshot(doc => {
+            if (!doc.exists) return logout();
+            const prevIndex = auctionData?.currentTurnIndex;
+            auctionData = doc.data();
+            
+            // If turn changed, hide loading
+            if (prevIndex !== auctionData.currentTurnIndex) {
+                hideLoading();
+            }
+            document.getElementById('nav-auction-name').innerText = auctionData.name || 'Draft Room';
+            document.getElementById('session-title').innerText = auctionData.name || 'Draft';
+            document.getElementById('section-badge').innerText = auctionData.section || 'SECTION';
+
+            if (auctionData.status !== 'active') {
+                document.getElementById('setup-screen').style.display = 'flex';
+                document.getElementById('waiting-screen').classList.add('hidden');
+                stopTimer();
+                return;
+            }
+            document.getElementById('setup-screen').style.display = 'none';
+
+            const currentTeamId = auctionData.turnOrder[auctionData.currentTurnIndex];
+            const isMyTurn = currentTeamId === myTeamId;
+
+            startTimer();
+
+            if (!isMyTurn && !isAdmin) {
+                document.getElementById('waiting-screen').classList.remove('hidden');
+                document.getElementById('waiting-screen').style.display = 'flex';
+                const t = auctionData.teams.find(t => t.teamId === currentTeamId);
+                const badge = document.getElementById('wait-team-badge');
+                if (t) {
+                    badge.innerText = t.teamName;
+                    badge.style.background = t.color || '#134E8E';
+                    // Also update focus panel badge if no selection
+                    if (!selectedId) {
+                        const focusBadge = document.getElementById('section-badge');
+                        focusBadge.innerText = t.teamName;
+                        focusBadge.style.background = t.color || '#134E8E';
+                    }
+                }
+            } else {
+                document.getElementById('waiting-screen').classList.add('hidden');
+                // Update focus panel badge if no selection
+                if (!selectedId) {
+                    const focusBadge = document.getElementById('section-badge');
+                    const myTeam = auctionData.teams.find(t => t.teamId === myTeamId);
+                    if (myTeam) {
+                        focusBadge.innerText = myTeam.teamName;
+                        focusBadge.style.background = myTeam.color || '#134E8E';
+                    }
+                }
+            }
+
+            renderRoundsGrid();
+            loadAndRenderStudents();
+        });
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (!auctionData || auctionData.status !== 'active') return;
+
+            // Get start time (fallback to local if server time hasn't arrived yet)
+            const startTime = auctionData.turnStartTime?.toDate?.()?.getTime() || Date.now();
+            const duration = 60000; // 60 seconds
+
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const diff = now - startTime;
+                const remaining = Math.max(0, duration - diff);
+                
+                const secs = Math.ceil(remaining / 1000);
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                
+                document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+                
+                const badge = document.getElementById('timer-badge');
+                if (secs <= 10) {
+                    badge.className = 'px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-full text-lg font-black mb-8 flex items-center gap-2';
+                } else {
+                    badge.className = 'px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded-full text-lg font-black mb-8 flex items-center gap-2';
+                }
+
+                if (remaining <= 0) {
+                    stopTimer();
+                    const currentTeamId = auctionData?.turnOrder?.[auctionData?.currentTurnIndex];
+                    if (currentTeamId === myTeamId) autoPassTurn();
+                }
+            }, 500);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSecondsLeft / 60);
+            const s = timerSecondsLeft % 60;
+            document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+            const badge = document.getElementById('timer-badge');
+            if (timerSecondsLeft <= 10) {
+                badge.className = 'px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-full text-lg font-black mb-8 flex items-center gap-2';
+            } else {
+                badge.className = 'px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded-full text-lg font-black mb-8 flex items-center gap-2';
+            }
+        }
+
+        async function autoPassTurn() {
+            showLoading();
+            showToast('⏰ Time up! Turn passed.', '#ef4444');
+            try {
+                await db.collection('auctions').doc(auctionId).update({
+                    currentTurnIndex: firebase.firestore.FieldValue.increment(1)
+                });
+            } catch(e) { 
+                console.error(e);
+                hideLoading();
+            }
+        }
+
+        function renderRoundsGrid() {
+            const d = auctionData;
+            const track = document.getElementById('rounds-track');
+            const currentIdx = d.currentTurnIndex;
+            const totalSlots = Math.min(d.turnOrder.length, currentIdx + 16);
+            let html = '';
+
+            for (let i = currentIdx; i < totalSlots; i++) {
+                const teamId = d.turnOrder[i];
+                const team = d.teams.find(t => t.teamId === teamId);
+                const isCurrent = i === currentIdx;
+                const color = team ? team.color : '#9CA3AF';
+                html += `
+                <div class="px-4 py-2 rounded-xl text-[10px] font-black text-white shrink-0 ${isCurrent ? 'ring-2 ring-offset-2 ring-black' : ''}" 
+                     style="background:${color}; opacity:${isCurrent ? '1' : '0.6'}">
+                    ${team ? team.teamName : '?'}
+                </div>`;
+            }
+            track.innerHTML = html;
+        }
+
+        function loadAndRenderStudents() {
+            if (!auctionData) return;
+            const currentSection = (auctionData.section || '').trim();
+            if (window.candidatesUnsub) window.candidatesUnsub();
+            window.candidatesUnsub = db.collection('candidates')
+                .where('section', '==', currentSection)
+                .where('inAuction', '==', true)
+                .onSnapshot(snap => {
+                    candidates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    filterStudents();
+                });
+        }
+
+        function filterStudents() {
+            const q = document.getElementById('student-search').value.toLowerCase();
+            const draftedIds = auctionData?.drafted?.map(p => p.studentId) || [];
+            const filtered = candidates.filter(s =>
+                !draftedIds.includes(s.id) &&
+                ((s.name || '').toLowerCase().includes(q) || (s.chestNo || '').toString().includes(q))
+            );
+            renderStudents(filtered);
+        }
+
+        function renderStudents(list) {
+            const tbody = document.getElementById('student-list');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-10 text-center text-[11px] font-black text-slate-300 uppercase tracking-widest">No Candidates Available</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(s => {
+                const isSelected = selectedId === s.id;
+                return `
+                <tr onclick="selectCandidate('${s.id}')" id="row-${s.id}"
+                    class="group cursor-pointer transition-all ${isSelected ? 'selected-row' : 'hover:bg-slate-50'}">
+                    <td class="p-4 rounded-l-2xl border-y border-l ${isSelected ? 'border-brand-blue bg-blue-50/30' : 'border-transparent'}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
+                                ${s.imageUrl ? `<img src="${s.imageUrl}" class="w-full h-full object-cover">` : `<i class="fi fi-rr-user text-slate-300"></i>`}
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-slate-800 leading-tight">${s.name}</div>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">#${s.chestNo || '-'} · ${s.class || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-right rounded-r-2xl border-y border-r ${isSelected ? 'border-brand-blue bg-blue-50/30' : 'border-transparent'}">
+                        ${isSelected ? 
+                            `<div class="w-6 h-6 rounded-full bg-brand-blue text-white flex items-center justify-center mx-auto shadow-md"><i class="fi fi-rr-check text-[10px]"></i></div>` : 
+                            `<div class="w-6 h-6 rounded-full border-2 border-slate-100 group-hover:border-brand-blue transition-colors"></div>`
+                        }
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function selectCandidate(id) {
+            if (isAdmin) return; // Observers can't select
+            const currentTeamId = auctionData?.turnOrder?.[auctionData?.currentTurnIndex];
+            if (currentTeamId !== myTeamId) return showToast("Wait for your turn!", '#ef4444');
+
+            const isDeselect = selectedId === id;
+            const newId = isDeselect ? null : id;
+
+            // Sync to Firestore for Admin View
+            try {
+                await db.collection('auctions').doc(auctionId).update({
+                    selectedCandidateId: newId
+                });
+            } catch (e) {
+                console.error("Selection sync failed", e);
+            }
+
+            if (isDeselect) {
+                // UNSELECT
+                selectedId = null;
+                document.getElementById('focus-name').innerText = '...';
+                document.getElementById('focus-class').innerText = '...';
+                document.getElementById('focus-photo').classList.add('hidden');
+                document.getElementById('focus-icon').classList.remove('hidden');
+                document.getElementById('btn-confirm').disabled = true;
+                filterStudents();
+                return;
+            }
+
+            const s = candidates.find(c => c.id === id);
+            if (!s) return;
+            selectedId = id;
+
+            // Update left panel
+            document.getElementById('focus-name').innerText = s.name;
+            document.getElementById('focus-class').innerText = `${s.class || ''} · ${s.section || ''}`;
+            document.getElementById('section-badge').innerText = s.section || 'SECTION';
+
+            const photo = document.getElementById('focus-photo');
+            const icon = document.getElementById('focus-icon');
+            if (s.imageUrl) {
+                photo.src = s.imageUrl;
+                photo.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                photo.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+
+            document.getElementById('btn-confirm').disabled = false;
+            filterStudents(); // re-render to update tick
+        }
+
+        async function confirmDraft() {
+            if (!selectedId || !auctionData || auctionData.status !== 'active') return;
+            const currentTeamId = auctionData.turnOrder[auctionData.currentTurnIndex];
+            if (currentTeamId !== myTeamId) return showToast("Not your turn!", '#ef4444');
+
+            const student = candidates.find(s => s.id === selectedId);
+            const myTeam  = auctionData.teams.find(t => t.teamId === myTeamId);
+
+            showLoading();
+            const btn = document.getElementById('btn-confirm');
+            btn.disabled = true;
+            btn.innerText = 'Confirming...';
+
+            const pick = {
+                studentId: selectedId,
+                studentName: student.name,
+                studentPhoto: student.imageUrl || '',
+                studentSection: student.section || '',
+                teamId: myTeamId,
+                teamName: myTeam.teamName,
+                orderIndex: auctionData.currentTurnIndex
+            };
+
+            try {
+                stopTimer();
+                const batch = db.batch();
+                
+                // 1. Update Auction Doc
+                batch.update(db.collection('auctions').doc(auctionId), {
+                    drafted: firebase.firestore.FieldValue.arrayUnion(pick),
+                    currentTurnIndex: firebase.firestore.FieldValue.increment(1),
+                    selectedCandidateId: null,
+                    turnStartTime: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. Update Candidate Doc (Commit to database immediately)
+                batch.update(db.collection('candidates').doc(selectedId), {
+                    team: myTeam.teamName,
+                    inAuction: false,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await batch.commit();
+
+                showToast(`✅ Successfully drafted: ${student.name}`, '#10b981');
+                selectedId = null;
+                document.getElementById('focus-name').innerText = '...';
+                document.getElementById('focus-class').innerText = '...';
+                document.getElementById('focus-photo').classList.add('hidden');
+                document.getElementById('focus-icon').classList.remove('hidden');
+                document.getElementById('student-search').value = '';
+                btn.innerText = 'Confirm';
+            } catch(e) {
+                console.error(e);
+                hideLoading();
+                showToast('Error! Try again.', '#ef4444');
+                btn.disabled = false;
+                btn.innerText = 'Confirm';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('auctionId');
+            localStorage.removeItem('auctionTeamId');
+            localStorage.removeItem('auctionTeamName');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
