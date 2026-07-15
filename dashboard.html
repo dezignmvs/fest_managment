@@ -11,6 +11,7 @@
     <link rel="icon" href="logo-512.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="logo-192.png">
     <meta name="theme-color" content="#134E8E">
+    <script src="fest-favicon.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
@@ -1161,6 +1162,18 @@
 
             // Clean up any dynamically extracted sidebars/overlays from previous modules
             document.querySelectorAll('.module-injected-element').forEach(el => el.remove());
+
+            // Unsubscribe all active Firestore listeners from the previous module
+            Object.keys(window).forEach(key => {
+                if (key.endsWith('Unsub') && typeof window[key] === 'function') {
+                    try {
+                        window[key]();
+                    } catch (e) {
+                        console.error(`Error cleaning up listener ${key}:`, e);
+                    }
+                    window[key] = null;
+                }
+            });
 
             protectedView.classList.add('hidden');
             dashboard.classList.add('hidden');

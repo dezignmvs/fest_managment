@@ -1,4 +1,4 @@
-const CACHE_NAME = 'festie-cache-v9'; // Increment this to force update
+const CACHE_NAME = 'festie-cache-v27'; // Increment this to force update
 const URLS_TO_CACHE = [
     './',
     './index.html',
@@ -20,6 +20,13 @@ const URLS_TO_CACHE = [
     './logo-192.svg',
     './logo-512.svg',
     './manifest.json',
+    './fest-favicon.js',
+    './auction/index.html',
+    './auction/owner.html',
+    './auction/manager.html',
+    './auction/live.html',
+    './auction/app.css',
+    './auction/app.js',
     'https://cdn.tailwindcss.com',
     'https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css',
     'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css',
