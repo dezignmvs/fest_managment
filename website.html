@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Settings</title>
+    <title>Website Portal Control Center</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="public/asset/5Rect.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <script>
         tailwind.config = {
             theme: {
@@ -18,8 +19,10 @@
                         brand: {
                             bg: '#f8f9fc',
                             primary: '#134E8E',
+                            blue: '#134E8E',
                             secondary: '#FFB33F',
-                            accent: '#F43F5E'
+                            accent: '#F43F5E',
+                            teal: '#09ABB1'
                         }
                     }
                 }
@@ -49,15 +52,6 @@
             background: #9ca3af;
         }
 
-        .toggle-checkbox:checked+.toggle-label {
-            background-color: #134E8E;
-        }
-
-        .toggle-checkbox:checked+.toggle-label::after {
-            transform: translateX(100%);
-            border-color: #134E8E;
-        }
-
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
@@ -65,7 +59,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px);
             }
 
             to {
@@ -78,59 +72,85 @@
 
 <body class="bg-brand-bg font-sans min-h-screen p-4 sm:p-6 md:p-8 overflow-x-hidden">
 
-    <div class="max-w-[1200px] mx-auto space-y-8 fade-in">
+    <div class="max-w-[1200px] mx-auto space-y-6 fade-in">
 
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Top Header & Global Actions -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm">
             <div>
-                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Website Settings</h1>
-                <p class="text-[13px] text-gray-500 mt-1">Configure your public portal's visibility, content, and
-                    countdown.</p>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-brand-blue rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
+                    <i class="fi fi-rr-globe text-xs"></i> Website Portal Admin
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Website Settings</h1>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Manage public site status, hero banners, countdowns, and festival coordinators.</p>
             </div>
             <button onclick="saveWebsiteConfig()"
-                class="flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl text-sm font-bold hover:shadow-lg shadow-brand-blue/20 transition-all active:scale-95">
+                class="flex items-center gap-2 px-7 py-3.5 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-2xl text-sm font-bold shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/30 transition-all active:scale-95 shrink-0">
                 <i class="fi fi-rr-disk text-xs"></i> Save All Changes
             </button>
         </div>
 
-        <div class="grid lg:grid-cols-12 gap-8">
+        <!-- Navigation Tab Switcher -->
+        <div class="flex items-center gap-2 p-1.5 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-x-auto custom-scrollbar">
+            <!-- Tab 1: General & Visibility -->
+            <button id="tab-btn-general" onclick="switchTab('general')"
+                class="tab-btn flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all bg-brand-blue text-white shadow-sm shrink-0">
+                <i class="fi fi-rr-settings text-sm"></i>
+                <span>General &amp; Visibility</span>
+            </button>
 
-            <!-- Left Column: Toggles & Pages -->
-            <div class="lg:col-span-7 space-y-6">
+            <!-- Tab 2: Hero & Countdown -->
+            <button id="tab-btn-hero" onclick="switchTab('hero')"
+                class="tab-btn flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all bg-white text-gray-600 border border-gray-100 hover:bg-gray-50 shrink-0">
+                <i class="fi fi-rr-layers text-sm"></i>
+                <span>Hero &amp; Countdown</span>
+            </button>
+
+            <!-- Tab 3: Coordinators & Controllers -->
+            <button id="tab-btn-coordinators" onclick="switchTab('coordinators')"
+                class="tab-btn flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all bg-white text-gray-600 border border-gray-100 hover:bg-gray-50 shrink-0">
+                <i class="fi fi-rr-users text-sm"></i>
+                <span>Coordinators &amp; Controllers</span>
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: General & Visibility -->
+        <!-- ========================================== -->
+        <div id="tab-content-general" class="tab-content space-y-6">
+            <div class="grid lg:grid-cols-12 gap-6">
 
                 <!-- Main Status Card -->
-                <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="space-y-1">
-                            <h3 class="text-lg font-bold text-gray-900">Website Visibility</h3>
-                            <p class="text-sm text-gray-500">Toggle the entire website on or off for maintenance.</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="website-on-off" class="sr-only peer">
-                            <div
-                                class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-brand-blue">
+                <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="space-y-1">
+                                <h3 class="text-lg font-bold text-gray-900">Website Visibility</h3>
+                                <p class="text-xs text-gray-500">Toggle the public portal live status or maintenance mode.</p>
                             </div>
-                        </label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="website-on-off" class="sr-only peer">
+                                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-brand-blue">
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 flex items-center gap-4">
-                            <div
-                                class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-brand-blue shadow-sm">
+                    <div class="grid sm:grid-cols-2 gap-4 mt-4">
+                        <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-brand-blue shadow-sm shrink-0">
                                 <i class="fi fi-rr-globe text-lg"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Status</p>
+                                <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Live Status</p>
                                 <p id="status-text" class="text-sm font-bold text-gray-900">Offline</p>
                             </div>
                         </div>
-                        <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-100 flex items-center gap-4">
-                            <div
-                                class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-brand-yellow shadow-sm">
+                        <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-100 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-brand-secondary shadow-sm shrink-0">
                                 <i class="fi fi-rr-eye text-lg"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-bold text-amber-600 uppercase tracking-widest">Views</p>
+                                <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Visits</p>
                                 <p id="total-views" class="text-sm font-bold text-gray-900">1,240</p>
                             </div>
                         </div>
@@ -138,151 +158,186 @@
                 </div>
 
                 <!-- Page Visibility Card -->
-                <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <i class="fi fi-rr-list-check text-brand-blue"></i> Page Visibility
+                <div class="lg:col-span-6 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fi fi-rr-list-check text-brand-blue"></i> Page Navigation Visibility
                     </h3>
+                    <p class="text-xs text-gray-500 mb-6">Enable or disable specific navigation sections across the public website.</p>
+                    
                     <div class="space-y-3" id="pages-container">
-                        <!-- Dynamic Pages -->
-                        <div class="page-toggle flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                        <!-- Home -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
                             onclick="toggleCheckbox('page-home')">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
-                                    <i class="fi fi-rr-home text-lg"></i>
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-home text-base"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800">Home Page</h4>
-                                    <p class="text-[11px] text-gray-400">Hero section and intro</p>
+                                    <h4 class="text-xs font-bold text-gray-800">Home Page</h4>
+                                    <p class="text-[10px] text-gray-400">Hero section and festival showcase</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="page-home"
-                                class="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer"
-                                checked onclick="event.stopPropagation()">
+                            <input type="checkbox" id="page-home" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
                         </div>
 
-                        <div class="page-toggle flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                        <!-- Standings -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
                             onclick="toggleCheckbox('page-standings')">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
-                                    <i class="fi fi-rr-trophy text-lg"></i>
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-trophy text-base"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800">Standings</h4>
-                                    <p class="text-[11px] text-gray-400">Leaderboards and results</p>
+                                    <h4 class="text-xs font-bold text-gray-800">Results &amp; Standings</h4>
+                                    <p class="text-[10px] text-gray-400">Live team scores and program outcomes</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="page-standings"
-                                class="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer"
-                                checked onclick="event.stopPropagation()">
+                            <input type="checkbox" id="page-standings" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
                         </div>
 
-                        <div class="page-toggle flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                        <!-- Downloads -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
                             onclick="toggleCheckbox('page-downloads')">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
-                                    <i class="fi fi-rr-download text-lg"></i>
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-download text-base"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800">Downloads</h4>
-                                    <p class="text-[11px] text-gray-400">Rulebooks and files</p>
+                                    <h4 class="text-xs font-bold text-gray-800">Downloads</h4>
+                                    <p class="text-[10px] text-gray-400">Rulebooks, forms, and schedules</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="page-downloads"
-                                class="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer"
-                                checked onclick="event.stopPropagation()">
+                            <input type="checkbox" id="page-downloads" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
                         </div>
 
-                        <div class="page-toggle flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                        <!-- Updates -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
+                            onclick="toggleCheckbox('page-updates')">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-book-alt text-base"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-gray-800">Updates &amp; Announcements</h4>
+                                    <p class="text-[10px] text-gray-400">Latest news, notifications, and alerts</p>
+                                </div>
+                            </div>
+                            <input type="checkbox" id="page-updates" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
+                        </div>
+
+                        <!-- Moments -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
                             onclick="toggleCheckbox('page-moments')">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
-                                    <i class="fi fi-rr-picture text-lg"></i>
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-picture text-base"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800">Moments</h4>
-                                    <p class="text-[11px] text-gray-400">Gallery albums</p>
+                                    <h4 class="text-xs font-bold text-gray-800">Moments &amp; Gallery</h4>
+                                    <p class="text-[10px] text-gray-400">Fest photo albums and highlights</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="page-moments"
-                                class="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer"
-                                checked onclick="event.stopPropagation()">
+                            <input type="checkbox" id="page-moments" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
                         </div>
 
-                        <div class="page-toggle flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                        <!-- Contact -->
+                        <div class="page-toggle flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-100 cursor-pointer group"
                             onclick="toggleCheckbox('page-contact')">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
-                                    <i class="fi fi-rr-envelope text-lg"></i>
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-white flex items-center justify-center text-gray-500 group-hover:text-brand-blue transition-all">
+                                    <i class="fi fi-rr-envelope text-base"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800">Contact</h4>
-                                    <p class="text-[11px] text-gray-400">Support and footer info</p>
+                                    <h4 class="text-xs font-bold text-gray-800">Contact Us</h4>
+                                    <p class="text-[10px] text-gray-400">Support channels and venue info</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="page-contact"
-                                class="w-5 h-5 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer"
-                                checked onclick="event.stopPropagation()">
+                            <input type="checkbox" id="page-contact" class="w-4 h-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue cursor-pointer" checked onclick="event.stopPropagation()">
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Right Column: Slider & Countdown -->
-            <div class="lg:col-span-5 space-y-6">
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: Hero & Countdown -->
+        <!-- ========================================== -->
+        <div id="tab-content-hero" class="tab-content hidden space-y-6">
+            <div class="grid lg:grid-cols-12 gap-6">
 
                 <!-- Countdown Settings -->
-                <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
+                <div class="lg:col-span-5 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <i class="fi fi-rr-clock-three text-brand-orange"></i> Finale Countdown
+                        <i class="fi fi-rr-clock-three text-brand-secondary"></i> Finale Countdown
                     </h3>
                     <div class="space-y-4">
                         <div>
-                            <label
-                                class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Ending
-                                Date & Time</label>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Ending Date &amp; Time</label>
                             <input type="datetime-local" id="countdown-date"
-                                class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
                         </div>
-                        <div class="p-4 rounded-2xl bg-red-50 border border-red-100 text-center">
-                            <p class="text-[11px] font-bold text-red-600 uppercase tracking-widest mb-1">Time Remaining
-                            </p>
-                            <div id="countdown-preview" class="text-lg font-black text-gray-900 tabular-nums">
-                                00:00:00:00</div>
+                        <div class="p-5 rounded-2xl bg-red-50/80 border border-red-100 text-center">
+                            <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Time Remaining</p>
+                            <div id="countdown-preview" class="text-2xl font-black text-gray-900 tabular-nums">00:00:00:00</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Hero Slides Card -->
-                <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm flex flex-col h-full">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fi fi-rr-layers text-brand-blue"></i> Hero Slides
-                        </h3>
-                        <button onclick="openSlidePicker()"
-                            class="text-[11px] font-black text-brand-blue uppercase tracking-widest hover:underline">Add
-                            Image</button>
-                    </div>
-
-                    <div id="slides-container"
-                        class="flex-1 space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                        <!-- Slides will be injected here -->
-                        <div class="py-12 text-center flex flex-col items-center justify-center space-y-3">
-                            <div
-                                class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-300">
-                                <i class="fi fi-rr-picture text-2xl"></i>
+                <div class="lg:col-span-7 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <i class="fi fi-rr-layers text-brand-blue"></i> Hero Banners
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-1">Add carousel slides for the main homepage hero area.</p>
                             </div>
-                            <p class="text-sm text-gray-400 font-medium">No slides added yet</p>
+                            <button onclick="openSlidePicker()"
+                                class="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-brand-blue rounded-xl text-xs font-bold transition-all">
+                                <i class="fi fi-rr-plus text-xs"></i> Add Slide
+                            </button>
+                        </div>
+
+                        <div id="slides-container" class="space-y-3 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
+                            <!-- Slides will be injected here -->
+                            <div class="py-10 text-center flex flex-col items-center justify-center space-y-2 border border-dashed border-gray-200 rounded-2xl">
+                                <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-300">
+                                    <i class="fi fi-rr-picture text-xl"></i>
+                                </div>
+                                <p class="text-xs text-gray-400 font-medium">No hero slides added yet</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
+        </div>
 
+        <!-- ========================================== -->
+        <!-- TAB 3: Coordinators & Controllers -->
+        <!-- ========================================== -->
+        <div id="tab-content-coordinators" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fi fi-rr-users text-brand-blue"></i> Coordinators &amp; Controllers
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">Manage festival controllers, coordinators, photos, roles &amp; locations displayed on homepage.</p>
+                    </div>
+                    <button onclick="openCoordinatorModal()"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs font-bold hover:shadow-lg shadow-brand-blue/20 transition-all active:scale-95 shrink-0">
+                        <i class="fi fi-rr-plus text-xs"></i> Add Person
+                    </button>
+                </div>
+
+                <!-- List of People Cards -->
+                <div id="coordinators-list" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
         </div>
 
     </div>
@@ -290,10 +345,9 @@
     <!-- File Picker Modal (Reusing Gallery logic) -->
     <div id="file-modal-overlay"
         class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1001] hidden flex items-center justify-center p-4">
-        <div
-            class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden relative border border-gray-100">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden relative border border-gray-100">
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h2 class="text-xl font-extrabold text-gray-900">Select Hero Slide</h2>
+                <h2 class="text-xl font-extrabold text-gray-900">Select Image</h2>
                 <button onclick="closeSlidePicker()"
                     class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
                     <i class="fi fi-rr-cross-small text-xl"></i>
@@ -308,22 +362,128 @@
                 <button onclick="closeSlidePicker()"
                     class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
                 <button onclick="confirmSlideSelection()" id="btn-confirm-slide" disabled
-                    class="px-8 py-2.5 bg-brand-blue text-white rounded-xl text-sm font-bold opacity-50 cursor-not-allowed shadow-lg shadow-brand-blue/20 transition-all">Select
-                    Image</button>
+                    class="px-8 py-2.5 bg-brand-blue text-white rounded-xl text-sm font-bold opacity-50 cursor-not-allowed shadow-lg shadow-brand-blue/20 transition-all">Select Image</button>
             </div>
         </div>
     </div>
 
+    <!-- Add / Edit Coordinator Modal -->
+    <div id="coordinator-modal-overlay"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1002] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-gray-100">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h2 id="coordinator-modal-title" class="text-xl font-extrabold text-gray-900">Add Person</h2>
+                <button onclick="closeCoordinatorModal()"
+                    class="w-9 h-9 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-400 transition-colors">
+                    <i class="fi fi-rr-cross-small text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="coord-id">
+
+                <!-- Person Image Preview & File Upload -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Card Image / Photo</label>
+                    <div class="flex items-center gap-4">
+                        <div id="coord-img-preview-box" class="w-20 h-24 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center relative shrink-0">
+                            <img id="coord-img-preview" src="" class="w-full h-full object-cover hidden">
+                            <span id="coord-img-placeholder" class="text-[10px] text-gray-400 font-bold text-center px-1">No Image</span>
+                        </div>
+                        <div class="space-y-2">
+                            <input type="file" id="coord-image-file" accept="image/*" class="hidden" onchange="handleCoordinatorImageUpload(event)">
+                            <button type="button" onclick="document.getElementById('coord-image-file').click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all flex items-center gap-2">
+                                <i class="fi fi-rr-upload text-xs"></i> Upload Photo
+                            </button>
+                            <button type="button" onclick="openSlidePickerForCoordinator()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-brand-blue text-xs font-bold rounded-xl transition-all flex items-center gap-2">
+                                <i class="fi fi-rr-picture text-xs"></i> Pick from Media
+                            </button>
+                            <button type="button" id="coord-img-remove-btn" onclick="clearCoordinatorImage()" class="px-3 py-1 text-xs text-red-500 font-semibold hover:underline hidden">Remove photo</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="coord-image-url">
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Full Name</label>
+                    <input type="text" id="coord-name" placeholder="e.g. Fulan Hudawi" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                </div>
+
+                <!-- Location / Subtitle -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Location / Subtitle</label>
+                    <input type="text" id="coord-location" placeholder="e.g. Odamala" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                </div>
+
+                <!-- Section Group -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Section Group</label>
+                    <select id="coord-group" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                        <option value="controller">Controller</option>
+                        <option value="coordinator">Coordinator</option>
+                    </select>
+                </div>
+
+                <!-- Role Badge Text -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Role Pill Badge</label>
+                    <input type="text" id="coord-role" placeholder="e.g. CHEIF, ASSISTANT, or COORDINATOR" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                </div>
+
+                <!-- Card Accent Color -->
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Card Accent Color (Fallback)</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="coord-color" value="#EA3650" class="w-10 h-10 rounded-xl cursor-pointer border border-gray-200 p-0.5">
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="setCoordColor('#EA3650')" class="w-6 h-6 rounded-full bg-[#EA3650] border border-gray-200 hover:scale-110 transition-transform"></button>
+                            <button type="button" onclick="setCoordColor('#EA8F23')" class="w-6 h-6 rounded-full bg-[#EA8F23] border border-gray-200 hover:scale-110 transition-transform"></button>
+                            <button type="button" onclick="setCoordColor('#00A3E0')" class="w-6 h-6 rounded-full bg-[#00A3E0] border border-gray-200 hover:scale-110 transition-transform"></button>
+                            <button type="button" onclick="setCoordColor('#09ABB1')" class="w-6 h-6 rounded-full bg-[#09ABB1] border border-gray-200 hover:scale-110 transition-transform"></button>
+                            <button type="button" onclick="setCoordColor('#2075BC')" class="w-6 h-6 rounded-full bg-[#2075BC] border border-gray-200 hover:scale-110 transition-transform"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                <button onclick="closeCoordinatorModal()" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
+                <button onclick="saveCoordinator()" class="px-8 py-2.5 bg-brand-blue text-white rounded-xl text-sm font-bold shadow-lg shadow-brand-blue/20 transition-all">Save Person</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JavaScript Logic -->
     <script>
         let websiteConfig = {
-            isWebsiteOn: false,
-            visiblePages: ['home', 'standings', 'downloads', 'moments', 'contact'],
+            isWebsiteOn: true,
+            visiblePages: ['home', 'standings', 'downloads', 'updates', 'moments', 'contact'],
             heroSlides: [],
             countdownEnd: ''
         };
 
         let contentFilesData = [];
         let selectedFileForSlide = null;
+
+        // ==========================================
+        // Tab Navigation Switcher
+        // ==========================================
+        window.switchTab = function (tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all bg-white text-gray-600 border border-gray-100 hover:bg-gray-50 shrink-0";
+            });
+
+            const targetContent = document.getElementById('tab-content-' + tabName);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('fade-in');
+            }
+
+            const targetBtn = document.getElementById('tab-btn-' + tabName);
+            if (targetBtn) {
+                targetBtn.className = "tab-btn flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all bg-brand-blue text-white shadow-sm shrink-0";
+            }
+        };
 
         function init() {
             if (!window.db) {
@@ -332,6 +492,7 @@
             }
             loadConfig();
             loadContentFiles();
+            loadCoordinators();
             startCountdownPreview();
         }
 
@@ -349,10 +510,10 @@
             document.getElementById('status-text').innerText = websiteConfig.isWebsiteOn ? 'Online' : 'Offline';
             document.getElementById('status-text').className = websiteConfig.isWebsiteOn ? 'text-sm font-bold text-green-600' : 'text-sm font-bold text-red-600';
 
-            const pages = ['home', 'standings', 'downloads', 'moments', 'contact'];
+            const pages = ['home', 'standings', 'downloads', 'updates', 'moments', 'contact'];
             pages.forEach(p => {
                 const el = document.getElementById('page-' + p);
-                if (el) el.checked = websiteConfig.visiblePages.includes(p);
+                if (el) el.checked = websiteConfig.visiblePages ? websiteConfig.visiblePages.includes(p) : true;
             });
 
             document.getElementById('countdown-date').value = websiteConfig.countdownEnd || '';
@@ -370,11 +531,11 @@
             const container = document.getElementById('slides-container');
             if (!websiteConfig.heroSlides || websiteConfig.heroSlides.length === 0) {
                 container.innerHTML = `
-                    <div class="py-12 text-center flex flex-col items-center justify-center space-y-3">
-                        <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-300">
-                            <i class="fi fi-rr-picture text-2xl"></i>
+                    <div class="py-10 text-center flex flex-col items-center justify-center space-y-2 border border-dashed border-gray-200 rounded-2xl">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-300">
+                            <i class="fi fi-rr-picture text-xl"></i>
                         </div>
-                        <p class="text-sm text-gray-400 font-medium">No slides added yet</p>
+                        <p class="text-xs text-gray-400 font-medium">No hero slides added yet</p>
                     </div>`;
                 return;
             }
@@ -434,14 +595,6 @@
             renderModalFiles();
         }
 
-        window.confirmSlideSelection = function () {
-            if (!selectedFileForSlide) return;
-            if (!websiteConfig.heroSlides) websiteConfig.heroSlides = [];
-            websiteConfig.heroSlides.push(selectedFileForSlide.url);
-            renderSlides();
-            closeSlidePicker();
-        }
-
         window.toggleCheckbox = function (id) {
             const el = document.getElementById(id);
             el.checked = !el.checked;
@@ -451,8 +604,11 @@
             websiteConfig.isWebsiteOn = document.getElementById('website-on-off').checked;
             websiteConfig.countdownEnd = document.getElementById('countdown-date').value;
 
-            const pages = ['home', 'standings', 'downloads', 'moments', 'contact'];
-            websiteConfig.visiblePages = pages.filter(p => document.getElementById('page-' + p).checked);
+            const pages = ['home', 'standings', 'downloads', 'updates', 'moments', 'contact'];
+            websiteConfig.visiblePages = pages.filter(p => {
+                const el = document.getElementById('page-' + p);
+                return el ? el.checked : true;
+            });
 
             try {
                 await db.collection('config').doc('website').set(websiteConfig);
@@ -493,6 +649,234 @@
             document.getElementById('status-text').innerText = e.target.checked ? 'Online' : 'Offline';
             document.getElementById('status-text').className = e.target.checked ? 'text-sm font-bold text-green-600' : 'text-sm font-bold text-red-600';
         });
+
+        // ==========================================
+        // Coordinators & Controllers Manager
+        // ==========================================
+        let coordinatorsData = [];
+        let isPickingImageForCoordinator = false;
+
+        function loadCoordinators() {
+            db.collection('coordinators').onSnapshot(snap => {
+                coordinatorsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCoordinatorsList();
+            }, e => console.error("Coordinators sync error:", e));
+        }
+
+        function renderCoordinatorsList() {
+            const container = document.getElementById('coordinators-list');
+            if (!container) return;
+
+            if (coordinatorsData.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-10 text-center flex flex-col items-center justify-center space-y-2 border border-dashed border-gray-200 rounded-2xl">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                            <i class="fi fi-rr-users text-xl"></i>
+                        </div>
+                        <p class="text-xs text-gray-500 font-bold">No coordinators or controllers added yet</p>
+                        <p class="text-[11px] text-gray-400">Click "+ Add Person" above to add festival controllers &amp; coordinators.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = coordinatorsData.map(c => {
+                const color = c.color || '#EA3650';
+                const bgStyle = c.imageUrl 
+                    ? `background-image: url('${c.imageUrl}'); background-size: cover; background-position: center;` 
+                    : `background-color: ${color};`;
+
+                return `
+                    <div class="bg-white border border-gray-100 rounded-2xl p-3 flex flex-col justify-between group hover:shadow-md hover:border-brand-blue/30 transition-all relative">
+                        <div>
+                            <div class="w-full aspect-[3/4] rounded-xl overflow-hidden mb-2.5 relative border border-gray-100" style="${bgStyle}">
+                                ${c.imageUrl ? '<div class="absolute inset-0 bg-black/10"></div>' : ''}
+                                <div class="absolute bottom-2 right-2 bg-white text-gray-900 text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-full uppercase shadow-sm">
+                                    ${c.role || c.group || 'MEMBER'}
+                                </div>
+                            </div>
+                            <div class="px-1">
+                                <h4 class="text-xs font-bold text-gray-900 truncate" title="${c.name}">${c.name}</h4>
+                                <p class="text-[10px] font-medium text-gray-400 truncate mt-0.5">${c.location || 'Odamala'} &bull; <span class="capitalize text-brand-blue font-bold">${c.group || 'Controller'}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-1.5 mt-3 pt-2 border-t border-gray-50">
+                            <button onclick="editCoordinator('${c.id}')" class="w-7 h-7 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-brand-blue transition-colors flex items-center justify-center">
+                                <i class="fi fi-rr-edit text-xs"></i>
+                            </button>
+                            <button onclick="deleteCoordinator('${c.id}')" class="w-7 h-7 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
+                                <i class="fi fi-rr-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.openCoordinatorModal = function (id = null) {
+            document.getElementById('coordinator-modal-overlay').classList.remove('hidden');
+            const titleEl = document.getElementById('coordinator-modal-title');
+            
+            if (id) {
+                const c = coordinatorsData.find(item => item.id === id);
+                if (!c) return;
+                titleEl.innerText = "Edit Person";
+                document.getElementById('coord-id').value = c.id;
+                document.getElementById('coord-name').value = c.name || '';
+                document.getElementById('coord-location').value = c.location || '';
+                document.getElementById('coord-group').value = c.group || 'controller';
+                document.getElementById('coord-role').value = c.role || '';
+                document.getElementById('coord-color').value = c.color || '#EA3650';
+                setCoordinatorImagePreview(c.imageUrl || '');
+            } else {
+                titleEl.innerText = "Add Person";
+                document.getElementById('coord-id').value = '';
+                document.getElementById('coord-name').value = '';
+                document.getElementById('coord-location').value = '';
+                document.getElementById('coord-group').value = 'controller';
+                document.getElementById('coord-role').value = '';
+                document.getElementById('coord-color').value = '#EA3650';
+                setCoordinatorImagePreview('');
+            }
+        };
+
+        window.editCoordinator = function (id) {
+            openCoordinatorModal(id);
+        };
+
+        window.closeCoordinatorModal = function () {
+            document.getElementById('coordinator-modal-overlay').classList.add('hidden');
+        };
+
+        window.setCoordColor = function (colorHex) {
+            document.getElementById('coord-color').value = colorHex;
+        };
+
+        window.handleCoordinatorImageUpload = function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 500;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const compressedUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    setCoordinatorImagePreview(compressedUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function setCoordinatorImagePreview(url) {
+            const preview = document.getElementById('coord-img-preview');
+            const placeholder = document.getElementById('coord-img-placeholder');
+            const removeBtn = document.getElementById('coord-img-remove-btn');
+            const inputUrl = document.getElementById('coord-image-url');
+
+            inputUrl.value = url || '';
+            if (url) {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                removeBtn.classList.remove('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        window.clearCoordinatorImage = function () {
+            setCoordinatorImagePreview('');
+            document.getElementById('coord-image-file').value = '';
+        };
+
+        window.openSlidePickerForCoordinator = function () {
+            isPickingImageForCoordinator = true;
+            openSlidePicker();
+        };
+
+        // Handle image pick from content files for coordinator modal
+        const baseConfirmSlideSelection = window.confirmSlideSelection;
+        window.confirmSlideSelection = function () {
+            if (isPickingImageForCoordinator && selectedFileForSlide) {
+                setCoordinatorImagePreview(selectedFileForSlide.url);
+                isPickingImageForCoordinator = false;
+                closeSlidePicker();
+            } else if (baseConfirmSlideSelection) {
+                baseConfirmSlideSelection();
+            }
+        };
+
+        window.saveCoordinator = async function () {
+            const id = document.getElementById('coord-id').value;
+            const name = document.getElementById('coord-name').value.trim();
+            const location = document.getElementById('coord-location').value.trim();
+            const group = document.getElementById('coord-group').value;
+            const role = document.getElementById('coord-role').value.trim();
+            const color = document.getElementById('coord-color').value;
+            const imageUrl = document.getElementById('coord-image-url').value;
+
+            if (!name) {
+                alert("Please enter full name.");
+                return;
+            }
+
+            const payload = {
+                name,
+                location: location || 'Odamala',
+                group: group || 'controller',
+                role: role || (group === 'controller' ? 'CONTROLLER' : 'COORDINATOR'),
+                color: color || '#EA3650',
+                imageUrl: imageUrl || '',
+                updatedAt: new Date()
+            };
+
+            try {
+                if (id) {
+                    await db.collection('coordinators').doc(id).update(payload);
+                } else {
+                    payload.createdAt = new Date();
+                    await db.collection('coordinators').add(payload);
+                }
+                closeCoordinatorModal();
+                if (window.showToast) showToast("✅ Person saved successfully!");
+                else alert("Saved successfully!");
+            } catch (e) {
+                console.error("Save coordinator error:", e);
+                alert("Error saving person.");
+            }
+        };
+
+        window.deleteCoordinator = async function (id) {
+            if (!confirm("Are you sure you want to delete this person?")) return;
+            try {
+                await db.collection('coordinators').doc(id).delete();
+                if (window.showToast) showToast("Deleted successfully");
+            } catch (e) {
+                console.error("Delete error:", e);
+                alert("Error deleting person.");
+            }
+        };
 
         init();
     </script>
