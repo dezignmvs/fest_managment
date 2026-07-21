@@ -667,16 +667,22 @@
                     const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
                     const cloudData = await res.json();
                     
-                    const type = file.type.startsWith('video') ? 'video' : 'image';
+                    const type = file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : 'image';
+                    const fileMimeType = file.type || (type === 'video' ? 'video/mp4' : type === 'audio' ? 'audio/mp3' : 'image/jpeg');
 
-                    await db.collection('mediaGallery').add({
+                    const docPayload = {
                         name: file.name,
+                        size: file.size || cloudData.bytes || 0,
+                        type: fileMimeType,
                         url: cloudData.secure_url,
-                        type: type,
+                        public_id: cloudData.public_id || '',
                         albumId: albumId,
                         albumName: albumName,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    };
+
+                    await db.collection('mediaGallery').add(docPayload);
+                    await db.collection('contentFiles').add(docPayload);
 
                     const progress = Math.round(((i + 1) / selectedFiles.length) * 100);
                     progressBar.style.width = progress + '%';

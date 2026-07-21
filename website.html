@@ -345,24 +345,58 @@
     <!-- File Picker Modal (Reusing Gallery logic) -->
     <div id="file-modal-overlay"
         class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1001] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden relative border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h2 class="text-xl font-extrabold text-gray-900">Select Image</h2>
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden relative border border-gray-100">
+            <!-- Modal Header -->
+            <div class="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                        <i class="fi fi-rr-picture text-brand-blue"></i> Select Image for Hero Slide
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Select from uploaded images (Admin &amp; Media Manager)</p>
+                </div>
                 <button onclick="closeSlidePicker()"
-                    class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
+                    class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
                     <i class="fi fi-rr-cross-small text-xl"></i>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+
+            <!-- Search & Filters Toolbar -->
+            <div class="px-6 py-3 border-b border-gray-100 bg-gray-50/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="relative w-full sm:w-72">
+                    <i class="fi fi-rr-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="modal-file-search" oninput="filterModalFiles()" placeholder="Search by name or album..."
+                        class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all">
+                </div>
+                <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto custom-scrollbar">
+                    <button onclick="setModalFilter('all')" id="modal-filter-all"
+                        class="modal-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-brand-blue text-white shadow-sm">All Files</button>
+                    <button onclick="setModalFilter('admin')" id="modal-filter-admin"
+                        class="modal-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-gray-600 border border-gray-200 hover:bg-gray-100">Admin Uploads</button>
+                    <button onclick="setModalFilter('media')" id="modal-filter-media"
+                        class="modal-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-gray-600 border border-gray-200 hover:bg-gray-100">Media Manager</button>
+                </div>
+            </div>
+
+            <!-- Modal Files Grid Content -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gray-50/30">
                 <div id="modal-files-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     <!-- Files injected by JS -->
                 </div>
             </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-                <button onclick="closeSlidePicker()"
-                    class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
-                <button onclick="confirmSlideSelection()" id="btn-confirm-slide" disabled
-                    class="px-8 py-2.5 bg-brand-blue text-white rounded-xl text-sm font-bold opacity-50 cursor-not-allowed shadow-lg shadow-brand-blue/20 transition-all">Select Image</button>
+
+            <!-- Modal Footer -->
+            <div class="p-4 sm:p-5 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white">
+                <div id="selected-file-info" class="text-xs text-gray-500 font-medium truncate max-w-xs sm:max-w-md">
+                    No image selected
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button onclick="closeSlidePicker()"
+                        class="px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
+                    <button onclick="confirmSlideSelection()" id="btn-confirm-slide" disabled
+                        class="px-7 py-2.5 bg-brand-blue text-white rounded-xl text-xs font-bold opacity-50 cursor-not-allowed shadow-lg shadow-brand-blue/20 transition-all flex items-center gap-2">
+                        <i class="fi fi-rr-check text-xs"></i> Select Image
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -461,9 +495,6 @@
             countdownEnd: ''
         };
 
-        let contentFilesData = [];
-        let selectedFileForSlide = null;
-
         // ==========================================
         // Tab Navigation Switcher
         // ==========================================
@@ -506,9 +537,14 @@
         }
 
         function applyConfigToUI() {
-            document.getElementById('website-on-off').checked = websiteConfig.isWebsiteOn;
-            document.getElementById('status-text').innerText = websiteConfig.isWebsiteOn ? 'Online' : 'Offline';
-            document.getElementById('status-text').className = websiteConfig.isWebsiteOn ? 'text-sm font-bold text-green-600' : 'text-sm font-bold text-red-600';
+            const toggle = document.getElementById('website-on-off');
+            if (toggle) toggle.checked = websiteConfig.isWebsiteOn;
+
+            const statusText = document.getElementById('status-text');
+            if (statusText) {
+                statusText.innerText = websiteConfig.isWebsiteOn ? 'Online' : 'Offline';
+                statusText.className = websiteConfig.isWebsiteOn ? 'text-sm font-bold text-green-600' : 'text-sm font-bold text-red-600';
+            }
 
             const pages = ['home', 'standings', 'downloads', 'updates', 'moments', 'contact'];
             pages.forEach(p => {
@@ -516,19 +552,80 @@
                 if (el) el.checked = websiteConfig.visiblePages ? websiteConfig.visiblePages.includes(p) : true;
             });
 
-            document.getElementById('countdown-date').value = websiteConfig.countdownEnd || '';
-            document.getElementById('total-views').innerText = (websiteConfig.views || 0).toLocaleString();
+            const countDate = document.getElementById('countdown-date');
+            if (countDate) countDate.value = websiteConfig.countdownEnd || '';
+
+            const totalViews = document.getElementById('total-views');
+            if (totalViews) totalViews.innerText = (websiteConfig.views || 0).toLocaleString();
+
             renderSlides();
         }
 
+        let contentFilesData = [];
+        let rawContentFiles = [];
+        let rawMediaGalleryFiles = [];
+        let selectedFileForSlide = null;
+        let activeModalFilter = 'all';
+
         async function loadContentFiles() {
-            db.collection('contentFiles').where('type', '>=', 'image/').where('type', '<=', 'image/z').onSnapshot(snap => {
-                contentFilesData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Listen to contentFiles (Admin uploads)
+            db.collection('contentFiles').onSnapshot(snap => {
+                rawContentFiles = snap.docs.map(doc => ({ 
+                    id: doc.id, 
+                    source: 'admin',
+                    sourceLabel: 'Admin Files',
+                    ...doc.data() 
+                }));
+                combineAndRenderModalFiles();
+            }, e => console.error("contentFiles sync error:", e));
+
+            // Listen to mediaGallery (Media Manager uploads)
+            db.collection('mediaGallery').onSnapshot(snap => {
+                rawMediaGalleryFiles = snap.docs.map(doc => ({ 
+                    id: doc.id, 
+                    source: 'media',
+                    sourceLabel: doc.data().albumName ? `Album: ${doc.data().albumName}` : 'Media Manager',
+                    ...doc.data() 
+                }));
+                combineAndRenderModalFiles();
+            }, e => console.error("mediaGallery sync error:", e));
+        }
+
+        function combineAndRenderModalFiles() {
+            const combined = [...rawContentFiles, ...rawMediaGalleryFiles];
+            const uniqueMap = new Map();
+
+            // Include uploaded images
+            combined.forEach(f => {
+                if (!f.url) return;
+                const type = (f.type || '').toLowerCase();
+                const url = f.url.toLowerCase();
+                const isImage = !type || type.startsWith('image') || type === 'image' || url.match(/\.(jpg|jpeg|png|webp|gif|svg|bmp)(\?.*)?$/i);
+                if (isImage && !uniqueMap.has(f.url)) {
+                    uniqueMap.set(f.url, f);
+                }
             });
+
+            // Default fallback mock images if database empty
+            const defaultMocks = [
+                { id: 'mock-1', name: 'Fest Showcase Banner', url: 'asset/fest_showcase.png', source: 'admin', sourceLabel: 'Default Asset' },
+                { id: 'mock-2', name: 'College Campus View', url: 'asset/clg.jpg', source: 'admin', sourceLabel: 'Default Asset' }
+            ];
+
+            defaultMocks.forEach(m => {
+                if (!uniqueMap.has(m.url)) {
+                    uniqueMap.set(m.url, m);
+                }
+            });
+
+            contentFilesData = Array.from(uniqueMap.values());
+            renderModalFiles();
         }
 
         function renderSlides() {
             const container = document.getElementById('slides-container');
+            if (!container) return;
+
             if (!websiteConfig.heroSlides || websiteConfig.heroSlides.length === 0) {
                 container.innerHTML = `
                     <div class="py-10 text-center flex flex-col items-center justify-center space-y-2 border border-dashed border-gray-200 rounded-2xl">
@@ -544,14 +641,14 @@
                 <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-2xl group hover:border-brand-blue/30 transition-all">
                     <div class="flex items-center gap-3 overflow-hidden">
                         <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
-                            <img src="${url}" class="w-full h-full object-cover">
+                            <img src="${url}" class="w-full h-full object-cover" onerror="this.src='asset/fest_showcase.png'">
                         </div>
                         <div class="truncate">
                             <p class="text-xs font-bold text-gray-800 truncate">Slide #${idx + 1}</p>
                             <p class="text-[10px] text-gray-400 truncate">${url.split('/').pop().split('?')[0]}</p>
                         </div>
                     </div>
-                    <button onclick="removeSlide(${idx})" class="w-8 h-8 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
+                    <button onclick="removeSlide(${idx})" title="Delete Slide" class="w-8 h-8 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
                         <i class="fi fi-rr-trash text-sm"></i>
                     </button>
                 </div>
@@ -559,8 +656,10 @@
         }
 
         function removeSlide(idx) {
+            if (!websiteConfig.heroSlides) return;
             websiteConfig.heroSlides.splice(idx, 1);
             renderSlides();
+            saveWebsiteConfig();
         }
 
         window.openSlidePicker = function () {
@@ -571,28 +670,137 @@
         window.closeSlidePicker = function () {
             document.getElementById('file-modal-overlay').classList.add('hidden');
             selectedFileForSlide = null;
+            isPickingImageForCoordinator = false;
+            const btn = document.getElementById('btn-confirm-slide');
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+            const infoText = document.getElementById('selected-file-info');
+            if (infoText) infoText.innerText = 'No image selected';
         }
+
+        window.setModalFilter = function(filter) {
+            activeModalFilter = filter;
+            document.querySelectorAll('.modal-filter-btn').forEach(btn => {
+                btn.className = "modal-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-gray-600 border border-gray-200 hover:bg-gray-100";
+            });
+            const activeBtn = document.getElementById('modal-filter-' + filter);
+            if (activeBtn) {
+                activeBtn.className = "modal-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-brand-blue text-white shadow-sm";
+            }
+            renderModalFiles();
+        };
+
+        window.filterModalFiles = function() {
+            renderModalFiles();
+        };
 
         function renderModalFiles() {
             const grid = document.getElementById('modal-files-grid');
-            grid.innerHTML = contentFilesData.map(f => `
-                <div onclick="selectFileForSlide('${f.id}')" class="bg-white border ${selectedFileForSlide?.id === f.id ? 'border-brand-blue ring-2 ring-brand-blue/10' : 'border-gray-100'} rounded-2xl p-2 cursor-pointer transition-all group">
-                    <div class="aspect-video rounded-xl overflow-hidden bg-gray-50 mb-2 relative">
-                        <img src="${f.url}" class="w-full h-full object-cover">
-                        ${selectedFileForSlide?.id === f.id ? '<div class="absolute inset-0 bg-brand-blue/20 flex items-center justify-center text-white"><i class="fi fi-rr-check text-2xl"></i></div>' : ''}
+            if (!grid) return;
+
+            const searchQuery = (document.getElementById('modal-file-search')?.value || '').toLowerCase().trim();
+
+            const filtered = contentFilesData.filter(f => {
+                if (activeModalFilter === 'admin' && f.source !== 'admin') return false;
+                if (activeModalFilter === 'media' && f.source !== 'media') return false;
+
+                if (searchQuery) {
+                    const matchName = (f.name || '').toLowerCase().includes(searchQuery);
+                    const matchSource = (f.sourceLabel || '').toLowerCase().includes(searchQuery);
+                    const matchAlbum = (f.albumName || '').toLowerCase().includes(searchQuery);
+                    return matchName || matchSource || matchAlbum;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center flex flex-col items-center justify-center space-y-3 bg-white rounded-2xl border border-dashed border-gray-200">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                            <i class="fi fi-rr-picture text-xl"></i>
+                        </div>
+                        <p class="text-xs font-bold text-gray-600">No images found</p>
+                        <p class="text-[11px] text-gray-400 max-w-xs">Upload images via Admin Files section or Media Manager to select them here.</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(f => {
+                const isSelected = selectedFileForSlide?.url === f.url;
+                return `
+                <div onclick="selectFileForSlide('${f.id}')" ondblclick="selectAndConfirmFile('${f.id}')" 
+                    class="bg-white border ${isSelected ? 'border-brand-blue ring-2 ring-brand-blue/20 shadow-md' : 'border-gray-200 hover:border-brand-blue/40'} rounded-2xl p-2.5 cursor-pointer transition-all group flex flex-col justify-between">
+                    <div>
+                        <div class="aspect-video rounded-xl overflow-hidden bg-gray-100 mb-2 relative group-hover:shadow-sm transition-all">
+                            <img src="${f.url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='asset/fest_showcase.png'">
+                            ${isSelected ? `
+                                <div class="absolute inset-0 bg-brand-blue/25 backdrop-blur-[1px] flex items-center justify-center text-white">
+                                    <div class="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center shadow-lg transform scale-110">
+                                        <i class="fi fi-rr-check text-sm font-bold text-white"></i>
+                                    </div>
+                                </div>` : `
+                                <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                    <span class="text-[10px] bg-black/60 px-2 py-1 rounded-md font-semibold">Click to select</span>
+                                </div>
+                            `}
+                        </div>
+                        <p class="text-xs font-bold text-gray-800 truncate px-1" title="${f.name || 'Image'}">${f.name || 'Untitled Image'}</p>
                     </div>
-                    <p class="text-[10px] font-bold text-gray-700 truncate px-1">${f.name}</p>
-                </div>
-            `).join('');
+                    <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] px-1">
+                        <span class="px-2 py-0.5 rounded-full font-bold ${f.source === 'media' ? 'bg-purple-50 text-purple-600 border border-purple-100' : 'bg-blue-50 text-brand-blue border border-blue-100'} truncate max-w-[120px]">
+                            ${f.sourceLabel || (f.source === 'media' ? 'Media Manager' : 'Admin')}
+                        </span>
+                        <i class="fi fi-rr-angle-right text-gray-300 group-hover:text-brand-blue transition-colors"></i>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         window.selectFileForSlide = function (id) {
             selectedFileForSlide = contentFilesData.find(f => f.id === id);
             const btn = document.getElementById('btn-confirm-slide');
-            btn.disabled = !selectedFileForSlide;
-            btn.style.opacity = selectedFileForSlide ? '1' : '0.5';
-            btn.style.cursor = selectedFileForSlide ? 'pointer' : 'not-allowed';
+            const infoText = document.getElementById('selected-file-info');
+
+            if (selectedFileForSlide) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                if (infoText) {
+                    infoText.innerHTML = `Selected: <span class="font-bold text-gray-800">${selectedFileForSlide.name || 'Image'}</span>`;
+                }
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                if (infoText) infoText.innerText = 'No image selected';
+            }
             renderModalFiles();
+        }
+
+        window.selectAndConfirmFile = function (id) {
+            selectFileForSlide(id);
+            confirmSlideSelection();
+        }
+
+        window.confirmSlideSelection = function () {
+            if (!selectedFileForSlide || !selectedFileForSlide.url) return;
+
+            if (isPickingImageForCoordinator) {
+                setCoordinatorImagePreview(selectedFileForSlide.url);
+                isPickingImageForCoordinator = false;
+                closeSlidePicker();
+            } else {
+                if (!websiteConfig.heroSlides) websiteConfig.heroSlides = [];
+                websiteConfig.heroSlides.push(selectedFileForSlide.url);
+                renderSlides();
+                saveWebsiteConfig();
+                if (window.showToast) showToast("✅ Hero slide added!");
+                else alert("Hero slide added successfully!");
+                closeSlidePicker();
+            }
         }
 
         window.toggleCheckbox = function (id) {
@@ -600,7 +808,7 @@
             el.checked = !el.checked;
         }
 
-        async function saveWebsiteConfig() {
+        window.saveWebsiteConfig = async function saveWebsiteConfig() {
             websiteConfig.isWebsiteOn = document.getElementById('website-on-off').checked;
             websiteConfig.countdownEnd = document.getElementById('countdown-date').value;
 
@@ -815,18 +1023,6 @@
             openSlidePicker();
         };
 
-        // Handle image pick from content files for coordinator modal
-        const baseConfirmSlideSelection = window.confirmSlideSelection;
-        window.confirmSlideSelection = function () {
-            if (isPickingImageForCoordinator && selectedFileForSlide) {
-                setCoordinatorImagePreview(selectedFileForSlide.url);
-                isPickingImageForCoordinator = false;
-                closeSlidePicker();
-            } else if (baseConfirmSlideSelection) {
-                baseConfirmSlideSelection();
-            }
-        };
-
         window.saveCoordinator = async function () {
             const id = document.getElementById('coord-id').value;
             const name = document.getElementById('coord-name').value.trim();
@@ -878,6 +1074,7 @@
             }
         };
 
+        window.init = init;
         init();
     </script>
 </body>

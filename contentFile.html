@@ -264,12 +264,62 @@
 
         function setupRealtimeListener() {
             if (window.filesUnsub) window.filesUnsub(); 
+            if (window.mediaUnsub) window.mediaUnsub(); 
             
-            window.filesUnsub = window.db.collection('contentFiles').orderBy('createdAt', 'desc').onSnapshot(snap => {
-                filesData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFilesUI(); 
+            let contentFilesList = [];
+            let mediaGalleryList = [];
+
+            function mergeAndRenderFiles() {
+                const map = new Map();
+
+                // Add contentFiles docs
+                contentFilesList.forEach(item => {
+                    if (item.url) map.set(item.url, item);
+                });
+
+                // Add mediaGallery docs
+                mediaGalleryList.forEach(item => {
+                    if (item.url && !map.has(item.url)) {
+                        let typeStr = item.type || 'image/jpeg';
+                        if (typeStr === 'video') typeStr = 'video/mp4';
+                        else if (typeStr === 'audio') typeStr = 'audio/mp3';
+                        else if (typeStr === 'image') typeStr = 'image/jpeg';
+
+                        map.set(item.url, {
+                            id: item.id,
+                            name: item.name || item.albumName || 'Media Manager Upload',
+                            size: item.size || 1572864,
+                            type: typeStr,
+                            url: item.url,
+                            createdAt: item.createdAt || new Date()
+                        });
+                    }
+                });
+
+                filesData = Array.from(map.values());
+
+                // Sort descending by date
+                filesData.sort((a, b) => {
+                    const timeA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
+                    const timeB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : (b.createdAt instanceof Date ? b.createdAt.getTime() : 0);
+                    return timeB - timeA;
+                });
+
+                renderFilesUI();
+            }
+
+            window.filesUnsub = window.db.collection('contentFiles').onSnapshot(snap => {
+                contentFilesList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                mergeAndRenderFiles();
             }, (error) => {
-                console.error("Error fetching real-time files: ", error);
+                console.error("Error fetching contentFiles: ", error);
+            });
+
+            window.mediaUnsub = window.db.collection('mediaGallery').onSnapshot(snap => {
+                mediaGalleryList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                mergeAndRenderFiles();
+            }, (error) => {
+                console.error("Error fetching mediaGallery: ", error);
             });
         }
 

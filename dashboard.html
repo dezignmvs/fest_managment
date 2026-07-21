@@ -826,6 +826,12 @@
                 <input type="text" id="edit-festname"
                     class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 transition-all">
             </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Festival
+                    Year</label>
+                <input type="text" id="edit-festyear" placeholder="2026"
+                    class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 transition-all">
+            </div>
             <div class="flex items-center justify-between py-3 border-t border-b border-gray-50">
                 <div>
                     <label class="block text-sm font-bold text-brand-textDark">System Status</label>
@@ -1551,8 +1557,9 @@
 
         function populateFestFields() {
             db.collection('config').doc('festData').get().then(doc => {
-                const d = doc.exists ? doc.data() : { name: 'ArtFest', isActive: true };
+                const d = doc.exists ? doc.data() : { name: 'ArtFest', year: '2026', isActive: true };
                 document.getElementById('edit-festname').value = d.name || '';
+                document.getElementById('edit-festyear').value = d.year || '2026';
                 document.getElementById('edit-feststatus').checked = d.isActive !== false;
                 
                 // Previews
@@ -1579,12 +1586,13 @@
 
             try {
                 const name = document.getElementById('edit-festname').value;
+                const year = document.getElementById('edit-festyear').value || '2026';
                 const isActive = document.getElementById('edit-feststatus').checked;
                 
                 const file192 = document.getElementById('input-logo192').files[0];
                 const file502 = document.getElementById('input-logo502').files[0];
                 
-                const updateData = { name, isActive };
+                const updateData = { name, year, isActive };
                 
                 if (file192) {
                     const ref192 = firebase.storage().ref().child('fest/logo192_' + Date.now());
