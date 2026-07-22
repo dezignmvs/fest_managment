@@ -194,6 +194,15 @@
                     
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-medium">Team Captain</span>
+                            <span id="vt-detail-captain" class="font-bold text-gray-900">—</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-medium">Assistant Captain</span>
+                            <span id="vt-detail-assistant" class="font-bold text-gray-900">—</span>
+                        </div>
+                        <div class="h-px bg-gray-100"></div>
+                        <div class="flex justify-between items-center text-sm">
                             <span class="text-gray-500 font-medium">Brand Color</span>
                             <div class="flex items-center gap-2">
                                 <div id="vt-detail-color-box" class="w-5 h-5 rounded-md shadow-sm border border-black/5"></div>
@@ -263,6 +272,7 @@
             
             let allTeamCandidates = [];
             let candidatePointsMap = {}; // candId -> points
+            let teamSeriesBase = 0;
 
             if (!teamId) {
                 document.getElementById('vt-name').innerText = "No Team Selected";
@@ -274,6 +284,7 @@
                 if (doc.exists) {
                     const t = doc.data();
                     const teamName = t.name;
+                    teamSeriesBase = parseInt(t.chestNoSeries) || 0;
                     document.getElementById('vt-name').innerText = teamName;
                     document.getElementById('vt-avatar').style.backgroundColor = t.color + '15';
                     document.getElementById('vt-avatar').style.color = t.color;
@@ -285,6 +296,8 @@
                         ? 'bg-[#FFB33F] text-yellow-950 text-[10px] font-black tracking-[0.1em] uppercase px-4 py-1.5 rounded-full shadow-sm border border-yellow-400/20'
                         : 'bg-red-50 text-red-600 text-[10px] font-black tracking-[0.1em] uppercase px-4 py-1.5 rounded-full shadow-sm border border-red-100';
 
+                    document.getElementById('vt-detail-captain').innerHTML = t.captainName ? `${t.captainName} <span class="font-mono-custom text-xs text-gray-400 font-bold ml-1">#${(parseInt(t.chestNoSeries) || 0) + 1}</span>` : '—';
+                    document.getElementById('vt-detail-assistant').innerHTML = t.assistantCaptainName ? `${t.assistantCaptainName} <span class="font-mono-custom text-xs text-gray-400 font-bold ml-1">#${(parseInt(t.chestNoSeries) || 0) + 2}</span>` : '—';
                     document.getElementById('vt-detail-color-box').style.backgroundColor = t.color;
                     document.getElementById('vt-detail-color-text').innerText = t.color;
                     document.getElementById('vt-detail-order').innerText = t.displayOrder || '—';
@@ -412,6 +425,12 @@
                 container.innerHTML = filtered.map(c => {
                     const pts = candidatePointsMap[c.id] || 0;
                     const initial = c.name ? c.name.charAt(0).toUpperCase() : '?';
+                    const isCap = c.isCaptain || (c.chestNo && teamSeriesBase && String(c.chestNo) === String(teamSeriesBase + 1));
+                    const isAsst = c.isAssistantCaptain || (c.chestNo && teamSeriesBase && String(c.chestNo) === String(teamSeriesBase + 2));
+                    const roleBadge = isCap 
+                        ? `<span class="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[9px] font-bold uppercase tracking-wider">Captain</span>` 
+                        : (isAsst ? `<span class="ml-2 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-[9px] font-bold uppercase tracking-wider">Asst Captain</span>` : '');
+
                     return `
                         <div class="grid grid-cols-12 gap-4 items-center py-3.5 px-4 border-b border-gray-100 hover:bg-gray-50 transition-colors group cursor-pointer" onclick="viewCandidateProfile('${c.id}', '${c.name.replace(/'/g, "\\'")}')">
                             <div class="col-span-2 font-mono-custom font-bold text-gray-500 text-sm">${isTeamManager ? '--' : '#' + (c.chestNo || '--')}</div>
@@ -421,7 +440,7 @@
                                 </div>
                             </div>
                             <div class="col-span-4">
-                                <span class="text-[13.5px] font-bold text-gray-900 group-hover:text-brand-blue transition-colors">${c.name}</span>
+                                <span class="text-[13.5px] font-bold text-gray-900 group-hover:text-brand-blue transition-colors flex items-center">${c.name}${roleBadge}</span>
                             </div>
                             <div class="col-span-2 text-center">
                                 <span class="px-2 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 rounded-md text-[10px] font-bold uppercase tracking-wider">${c.section || '—'}</span>
@@ -450,20 +469,28 @@
                     return;
                 }
 
-                container.innerHTML = toppers.map((c, idx) => `
+                container.innerHTML = toppers.map((c, idx) => {
+                    const isCap = c.isCaptain || (c.chestNo && teamSeriesBase && String(c.chestNo) === String(teamSeriesBase + 1));
+                    const isAsst = c.isAssistantCaptain || (c.chestNo && teamSeriesBase && String(c.chestNo) === String(teamSeriesBase + 2));
+                    const roleBadge = isCap 
+                        ? `<span class="ml-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[9px] font-bold uppercase tracking-wider shrink-0">C</span>` 
+                        : (isAsst ? `<span class="ml-1.5 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-[9px] font-bold uppercase tracking-wider shrink-0">AC</span>` : '');
+
+                    return `
                     <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-brand-blue/10 hover:bg-white hover:shadow-sm transition-all group cursor-pointer" onclick="viewCandidateProfile('${c.id}', '${c.name.replace(/'/g, "\\'")}')">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${idx === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-200 text-gray-500'}">
                             ${idx + 1}
                         </div>
                         <div class="flex-1 overflow-hidden">
-                            <div class="text-[13px] font-bold text-gray-900 truncate">${c.name}</div>
+                            <div class="text-[13px] font-bold text-gray-900 truncate flex items-center">${c.name}${roleBadge}</div>
                             <div class="text-[11px] text-gray-400 font-medium">${!isTeamManager ? '#' + c.chestNo + ' &bull; ' : ''}${c.section}</div>
                         </div>
                         <div class="text-[14px] font-black text-brand-blue">
                             ${c.points} <span class="text-[9px] text-gray-400">PTS</span>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             window.viewCandidateProfile = function(id, name) {

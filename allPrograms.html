@@ -345,6 +345,33 @@
                     </div>
                 </div>
 
+                <!-- Accordion 5: Concept & Skills -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button onclick="toggleAccordion('acc-concept', 'icon-concept')" class="w-full flex justify-between items-center p-5 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fi fi-rr-document"></i></div>
+                            <h3 class="text-[15px] font-bold text-gray-800">Concept & Skills</h3>
+                        </div>
+                        <i id="icon-concept" class="fi fi-rr-angle-small-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div id="acc-concept" class="hidden p-6 border-t border-gray-100 bg-gray-50/30 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Participant Time Limit</label>
+                                <input type="text" id="progTimeLimit" placeholder="e.g. 5 minutes each" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Skill Evaluated</label>
+                                <input type="text" id="progSkill" placeholder="e.g. Typing, Speed, Public Speaking" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Concept Note</label>
+                            <textarea id="progConceptNote" placeholder="Write the concept note or program details here..." rows="4" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all resize-y"></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-200">
                     <button onclick="closeFormView()" class="flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg text-[14px] font-bold hover:bg-gray-50 transition-all shadow-sm"><i class="fi fi-rr-cross text-sm"></i> Cancel</button>
                     <button onclick="saveProgram()" id="btn-save-program" class="flex items-center justify-center gap-2 px-8 py-2.5 bg-brand-blue text-white rounded-lg text-[14px] font-bold hover:bg-opacity-90 transition-all shadow-md"><i class="fi fi-rr-disk text-sm"></i> <span id="btn-save-program-text">Create Program</span></button>
@@ -450,7 +477,7 @@
 
             if(data.length === 0) return typeof showToast === 'function' && showToast("❌ No programs to export");
 
-            const headers = ["ID", "Code", "Name", "Section", "Type", "Status", "Max Participants", "Topic Reg", "Grading", "Scoring"];
+            const headers = ["ID", "Code", "Name", "Section", "Type", "Status", "Max Participants", "Topic Reg", "Grading", "Scoring", "Time Limit", "Skill Required", "Concept Note"];
             const rows = data.map(p => [
                 p.id,
                 p.code || '',
@@ -461,7 +488,10 @@
                 p.maxParticipants || 1,
                 p.topicRegistration ? 'Yes' : 'No',
                 p.enableGrading ? 'Yes' : 'No',
-                p.enableScoring ? 'Yes' : 'No'
+                p.enableScoring ? 'Yes' : 'No',
+                p.timeLimit || '',
+                p.skillRequired || '',
+                p.conceptNote || ''
             ]);
 
             let csvContent = "data:text/csv;charset=utf-8," 
@@ -546,6 +576,13 @@
             });
         }
 
+        function toggleAccordion(id, iconId) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(iconId);
+            if (content) content.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180');
+        }
+
         function toggleTemplateState(toggleId, selectId, iconId) {
             const isChecked = document.getElementById(toggleId).checked;
             const selectEl = document.getElementById(selectId);
@@ -575,7 +612,7 @@
                 document.getElementById('btn-save-program-text').innerText = "Create Program";
                 
                 // Reset
-                ['progCode', 'progName', 'progSection'].forEach(x => document.getElementById(x).value = '');
+                ['progCode', 'progName', 'progSection', 'progTimeLimit', 'progSkill', 'progConceptNote'].forEach(x => document.getElementById(x).value = '');
                 document.getElementById('progType').value = 'Individual';
                 document.getElementById('progStatus').value = 'active';
                 document.getElementById('progSet').value = '';
@@ -589,8 +626,8 @@
                 toggleTemplateState('progGrading', 'progGradeTemplate', 'icon-grade-template');
                 toggleTemplateState('progScoring', 'progScoreTemplate', 'icon-score-template');
                 toggleAccordion('acc-basic', 'icon-basic'); // Ensure basic is open
-                ['acc-limits', 'acc-reg', 'acc-score'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                ['icon-limits', 'icon-reg', 'icon-score'].forEach(id => document.getElementById(id).classList.remove('rotate-180'));
+                ['acc-limits', 'acc-reg', 'acc-score', 'acc-concept'].forEach(id => document.getElementById(id).classList.add('hidden'));
+                ['icon-limits', 'icon-reg', 'icon-score', 'icon-concept'].forEach(id => document.getElementById(id).classList.remove('rotate-180'));
             } else {
                 document.getElementById('form-title').innerText = "Edit Program";
                 document.getElementById('btn-save-program-text').innerText = "Update Program";
@@ -630,6 +667,10 @@
                         if (!st.value && val) st.setAttribute('data-pending-val', val);
                     }
 
+                    document.getElementById('progTimeLimit').value = p.timeLimit || '';
+                    document.getElementById('progSkill').value = p.skillRequired || '';
+                    document.getElementById('progConceptNote').value = p.conceptNote || '';
+
                     toggleTemplateState('progGrading', 'progGradeTemplate', 'icon-grade-template');
                     toggleTemplateState('progScoring', 'progScoreTemplate', 'icon-score-template');
                 }
@@ -668,7 +709,10 @@
                 enableGrading: document.getElementById('progGrading').checked,
                 gradeTemplateId: document.getElementById('progGrading').checked ? document.getElementById('progGradeTemplate').value : null,
                 enableScoring: document.getElementById('progScoring').checked,
-                positionTemplateId: document.getElementById('progScoring').checked ? document.getElementById('progScoreTemplate').value : null
+                positionTemplateId: document.getElementById('progScoring').checked ? document.getElementById('progScoreTemplate').value : null,
+                conceptNote: document.getElementById('progConceptNote').value || '',
+                timeLimit: document.getElementById('progTimeLimit').value || '',
+                skillRequired: document.getElementById('progSkill').value || ''
             };
             if (typeof firebase !== 'undefined' && firebase.firestore) {
                 payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();

@@ -193,19 +193,30 @@
                     </div>
                 </div>
 
-                <div class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2">Auction Control</div>
+                <div class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2">Auction
+                    Control</div>
                 <div class="mb-1">
-                    <a href="https://festie-auction.vercel.app/" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-brand-textMuted hover:bg-gray-50 hover:text-brand-textDark group transition-all text-left outline-none cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent group-hover:bg-white group-hover:shadow-sm transition-all">
+                    <div
+                        class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-brand-textMuted hover:bg-gray-50 hover:text-brand-textDark group transition-all text-left outline-none">
+                        <a href="https://festie-auction.vercel.app/" target="_blank"
+                            class="flex items-center gap-3 flex-grow cursor-pointer">
+                            <div
+                                class="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent group-hover:bg-white group-hover:shadow-sm transition-all">
                                 <i class="fi fi-rr-flag text-lg group-hover:text-brand-blue"></i>
                             </div>
                             <span class="text-[13px] font-semibold">Live Draft</span>
-                        </div>
-                    </a>
+                        </a>
+                        <label class="relative inline-flex items-center cursor-pointer group shrink-0 ml-2">
+                            <input type="checkbox" id="sidebar-live-draft" class="sr-only peer" onchange="window.toggleLiveDraft(this.checked)">
+                            <div
+                                class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FFB33F] shadow-inner transition-colors">
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2">Bulk Entry</div>
+                <div class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-2">Bulk Entry
+                </div>
                 <div class="mb-1">
                     <button onclick="toggleSubmenu('owner-submenu-bulk', 'owner-icon-submenu-bulk')"
                         class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-brand-textMuted hover:bg-gray-50 hover:text-brand-textDark group transition-all text-left outline-none cursor-pointer">
@@ -280,21 +291,27 @@
                     <button onclick="toggleSubmenu('owner-submenu-alerts', 'owner-icon-submenu-alerts')"
                         class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-brand-textMuted hover:bg-gray-50 hover:text-brand-textDark group transition-all text-left outline-none cursor-pointer">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent group-hover:bg-white group-hover:shadow-sm transition-all">
+                            <div
+                                class="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent group-hover:bg-white group-hover:shadow-sm transition-all">
                                 <i class="fi fi-rr-bell-ring text-lg group-hover:text-brand-red"></i>
                             </div>
                             <span class="text-[13px] font-semibold">Alerts</span>
                         </div>
-                        <i id="owner-icon-submenu-alerts" class="fi fi-rr-angle-small-down text-xs opacity-50 group-hover:opacity-100 transition-transform duration-200"></i>
+                        <i id="owner-icon-submenu-alerts"
+                            class="fi fi-rr-angle-small-down text-xs opacity-50 group-hover:opacity-100 transition-transform duration-200"></i>
                     </button>
                     <div id="owner-submenu-alerts" class="hidden flex-col mt-1 space-y-0.5 px-2">
                         <a href="#" data-tab="alerts" onclick="event.preventDefault(); showOwnerTab('alerts')"
                             class="flex items-center gap-3 px-4 py-2 rounded-lg text-[13px] text-gray-500 hover:text-brand-blue hover:bg-blue-50/50 font-medium transition-all group/item">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/item:bg-brand-blue transition-colors"></div> System Alerts
+                            <div
+                                class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/item:bg-brand-blue transition-colors">
+                            </div> System Alerts
                         </a>
                         <a href="#" data-tab="news" onclick="event.preventDefault(); showOwnerTab('news')"
                             class="flex items-center gap-3 px-4 py-2 rounded-lg text-[13px] text-gray-500 hover:text-brand-blue hover:bg-blue-50/50 font-medium transition-all group/item">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/item:bg-brand-blue transition-colors"></div> News
+                            <div
+                                class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover/item:bg-brand-blue transition-colors">
+                            </div> News
                         </a>
                     </div>
                 </div>
@@ -439,27 +456,32 @@
 
                 <!-- Grade Templates Tab -->
                 <div id="tpl-grade" class="hidden animate-in fade-in duration-500 w-full h-full">
-                    <iframe src="cardsetupGrade.html" class="w-full border-0 rounded-2xl" style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
+                    <iframe src="cardsetupGrade.html" class="w-full border-0 rounded-2xl"
+                        style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
                 </div>
 
                 <!-- Pattern Templates Tab -->
                 <div id="tpl-position" class="hidden animate-in fade-in duration-500 w-full h-full">
-                    <iframe src="cardsetupPosit.html" class="w-full border-0 rounded-2xl" style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
+                    <iframe src="cardsetupPosit.html" class="w-full border-0 rounded-2xl"
+                        style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
                 </div>
 
                 <!-- Poster Designer Tab -->
                 <div id="tpl-poster" class="hidden animate-in fade-in duration-500 w-full h-full">
-                    <iframe src="poster.html" class="w-full border-0 rounded-2xl" style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
+                    <iframe src="poster.html" class="w-full border-0 rounded-2xl" style="height: calc(100vh - 100px);"
+                        allowtransparency="true"></iframe>
                 </div>
 
                 <!-- Poster Setup Tab -->
                 <div id="tpl-posterset" class="hidden animate-in fade-in duration-500 w-full h-full">
-                    <iframe src="posterset.html" class="w-full border-0 rounded-2xl" style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
+                    <iframe src="posterset.html" class="w-full border-0 rounded-2xl"
+                        style="height: calc(100vh - 100px);" allowtransparency="true"></iframe>
                 </div>
 
                 <!-- Alerts Tab -->
                 <div id="tpl-alerts" class="hidden animate-in fade-in duration-500">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <div>
                             <h1 class="text-[1.35rem] font-bold text-gray-800 flex items-center gap-2">
                                 <i class="fi fi-rr-bell-ring text-brand-red"></i> System Alerts
@@ -467,25 +489,29 @@
                             <p class="text-[13px] text-gray-500 mt-1">Send notifications to Public or Team Managers.</p>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 max-w-2xl">
                         <form id="alertForm" onsubmit="sendAlert(event)" class="space-y-5">
                             <div>
                                 <label class="block text-sm font-semibold mb-1">Alert Title</label>
-                                <input type="text" id="alertTitle" required class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
+                                <input type="text" id="alertTitle" required
+                                    class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">Description</label>
-                                <textarea id="alertDesc" required rows="4" class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none"></textarea>
+                                <textarea id="alertDesc" required rows="4"
+                                    class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">Target Audience</label>
-                                <select id="alertTarget" class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
+                                <select id="alertTarget"
+                                    class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
                                     <option value="public">Public (Website)</option>
                                     <option value="team">Team Managers</option>
                                 </select>
                             </div>
-                            <button type="submit" id="btn-send-alert" class="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold w-full shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                            <button type="submit" id="btn-send-alert"
+                                class="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold w-full shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
                                 <i class="fi fi-rr-paper-plane"></i> Send Alert
                             </button>
                         </form>
@@ -508,7 +534,8 @@
                                 </thead>
                                 <tbody id="alerts-history-body" class="divide-y divide-gray-100">
                                     <tr>
-                                        <td colspan="4" class="px-6 py-8 text-center text-gray-400">Loading history...</td>
+                                        <td colspan="4" class="px-6 py-8 text-center text-gray-400">Loading history...
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -518,20 +545,27 @@
 
                 <!-- News Tab -->
                 <div id="tpl-news" class="hidden animate-in fade-in duration-500">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <div>
                             <h1 class="text-[1.35rem] font-bold text-gray-800 flex items-center gap-2">
                                 <i class="fi fi-rr-newspaper text-brand-blue"></i> News Management
                             </h1>
-                            <p class="text-[13px] text-gray-500 mt-1">Manage public news, announcements and featured content.</p>
+                            <p class="text-[13px] text-gray-500 mt-1">Manage public news, announcements and featured
+                                content.</p>
                         </div>
                     </div>
 
                     <!-- News Sub-tabs -->
                     <div class="flex border-b border-gray-200 mb-6 space-x-6 px-2">
-                        <button onclick="showNewsSubTab('news-entry')" id="tab-btn-news-entry" class="pb-3 text-sm font-bold text-brand-blue border-b-2 border-brand-blue transition-all">New Entry</button>
-                        <button onclick="showNewsSubTab('news-manage'); loadNews();" id="tab-btn-news-manage" class="pb-3 text-sm font-semibold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-all">Manage</button>
-                        <button onclick="showNewsSubTab('news-main'); loadNews();" id="tab-btn-news-main" class="pb-3 text-sm font-semibold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-all">Main News</button>
+                        <button onclick="showNewsSubTab('news-entry')" id="tab-btn-news-entry"
+                            class="pb-3 text-sm font-bold text-brand-blue border-b-2 border-brand-blue transition-all">New
+                            Entry</button>
+                        <button onclick="showNewsSubTab('news-manage'); loadNews();" id="tab-btn-news-manage"
+                            class="pb-3 text-sm font-semibold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-all">Manage</button>
+                        <button onclick="showNewsSubTab('news-main'); loadNews();" id="tab-btn-news-main"
+                            class="pb-3 text-sm font-semibold text-gray-500 hover:text-gray-800 border-b-2 border-transparent transition-all">Main
+                            News</button>
                     </div>
 
                     <!-- 1. News Entry Form -->
@@ -541,25 +575,33 @@
                                 <input type="hidden" id="newsId"> <!-- For editing -->
                                 <div>
                                     <label class="block text-sm font-semibold mb-1">Title</label>
-                                    <input type="text" id="newsTitle" required class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
+                                    <input type="text" id="newsTitle" required
+                                        class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold mb-1">News Content</label>
-                                    <textarea id="newsContent" required rows="5" class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none"></textarea>
+                                    <textarea id="newsContent" required rows="5"
+                                        class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none"></textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Image Upload (Leave empty to keep existing on edit)</label>
-                                    <input type="file" id="newsImage" accept="image/*" class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
+                                    <label class="block text-sm font-semibold mb-1">Image Upload (Leave empty to keep
+                                        existing on edit)</label>
+                                    <input type="file" id="newsImage" accept="image/*"
+                                        class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold mb-1">Date</label>
-                                    <input type="date" id="newsDate" required class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
+                                    <input type="date" id="newsDate" required
+                                        class="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-brand-blue/20 outline-none">
                                 </div>
                                 <div class="flex gap-4">
-                                    <button type="submit" id="btn-submit-news" class="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold w-full shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                                    <button type="submit" id="btn-submit-news"
+                                        class="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold w-full shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
                                         <i class="fi fi-rr-disk"></i> Submit News
                                     </button>
-                                    <button type="button" onclick="resetNewsForm()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-200 transition-all hidden" id="btn-cancel-edit-news">
+                                    <button type="button" onclick="resetNewsForm()"
+                                        class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-200 transition-all hidden"
+                                        id="btn-cancel-edit-news">
                                         Cancel Edit
                                     </button>
                                 </div>
@@ -575,7 +617,8 @@
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
-                                    <thead class="bg-gray-50 text-gray-500 font-bold text-[11px] uppercase tracking-wider">
+                                    <thead
+                                        class="bg-gray-50 text-gray-500 font-bold text-[11px] uppercase tracking-wider">
                                         <tr>
                                             <th class="px-6 py-3 w-16">Image</th>
                                             <th class="px-6 py-3">Title</th>
@@ -585,7 +628,8 @@
                                     </thead>
                                     <tbody id="news-manage-body" class="divide-y divide-gray-100">
                                         <tr>
-                                            <td colspan="4" class="px-6 py-8 text-center text-gray-400">Loading news...</td>
+                                            <td colspan="4" class="px-6 py-8 text-center text-gray-400">Loading news...
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -595,12 +639,15 @@
 
                     <!-- 3. Main News Selection -->
                     <div id="news-main" class="news-subtab hidden">
-                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6 max-w-3xl">
+                        <div
+                            class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-6 max-w-3xl">
                             <h3 class="font-bold text-gray-800 text-[14px] mb-4">Select Featured Main News</h3>
-                            <div id="news-main-list" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                            <div id="news-main-list"
+                                class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                                 <div class="text-center text-gray-400 py-4">Loading news...</div>
                             </div>
-                            <button onclick="updateMainNews()" id="btn-update-main-news" class="mt-6 bg-brand-yellow text-brand-textDark px-6 py-3 rounded-xl font-bold w-full shadow-md hover:bg-yellow-400 transition-all flex items-center justify-center gap-2">
+                            <button onclick="updateMainNews()" id="btn-update-main-news"
+                                class="mt-6 bg-brand-yellow text-brand-textDark px-6 py-3 rounded-xl font-bold w-full shadow-md hover:bg-yellow-400 transition-all flex items-center justify-center gap-2">
                                 <i class="fi fi-rr-star"></i> Set as Main News
                             </button>
                         </div>
@@ -1114,7 +1161,7 @@
                         class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h1 class="text-[1.35rem] font-bold text-gray-800 flex items-center gap-2"><i
-                                     class="fi fi-rr-apps text-brand-orange"></i> Bulk Program Import</h1>
+                                    class="fi fi-rr-apps text-brand-orange"></i> Bulk Program Import</h1>
                             <p class="text-[13px] text-gray-500 mt-1">Download a CSV template, fill it in, then upload
                                 to add multiple programs at once.</p>
                         </div>
@@ -1158,7 +1205,8 @@
                         <div>
                             <h1 class="text-[1.35rem] font-bold text-gray-800 flex items-center gap-2"><i
                                     class="fi fi-rr-document text-brand-blue"></i> Bulk Grade Template Import</h1>
-                            <p class="text-[13px] text-gray-500 mt-1">Upload CSV to create multiple grade templates with points mapping.</p>
+                            <p class="text-[13px] text-gray-500 mt-1">Upload CSV to create multiple grade templates with
+                                points mapping.</p>
                         </div>
                         <button onclick="downloadGradeTemplate()"
                             class="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-[13px] font-bold hover:bg-green-700 shadow-md transition-all">
@@ -1200,7 +1248,8 @@
                         <div>
                             <h1 class="text-[1.35rem] font-bold text-gray-800 flex items-center gap-2"><i
                                     class="fi fi-rr-trophy text-brand-yellow"></i> Bulk Pattern Template Import</h1>
-                            <p class="text-[13px] text-gray-500 mt-1">Upload CSV to create multiple pattern (position) templates.</p>
+                            <p class="text-[13px] text-gray-500 mt-1">Upload CSV to create multiple pattern (position)
+                                templates.</p>
                         </div>
                         <button onclick="downloadPositionTemplate()"
                             class="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full text-[13px] font-bold hover:bg-green-700 shadow-md transition-all">
@@ -1360,17 +1409,31 @@
                         </div>
                     </label>
                 </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                    <div class="flex flex-col">
+                        <label class="text-sm font-semibold text-gray-800">Live Draft</label>
+                        <span class="text-[10px] text-gray-500">Team setup by auction (ON) or manually entered (OFF).</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" id="edit-live-draft" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFB33F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FFB33F] shadow-inner transition-colors">
+                        </div>
+                    </label>
+                </div>
 
                 <div class="space-y-4 pt-4">
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Logo Configuration</label>
-                    
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Logo
+                        Configuration</label>
+
                     <div>
                         <label class="block text-[11px] font-semibold text-gray-600 mb-1.5">Main Logo URL</label>
                         <div class="flex gap-2">
                             <input type="text" id="edit-festlogo" placeholder="https://..."
                                 oninput="document.getElementById('preview-festlogo').innerHTML = this.value ? `<img src='${this.value}' class='w-full h-full object-cover'>` : `<i class='fi fi-rr-picture text-gray-300'></i>`"
                                 class="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-brand-blue/30">
-                            <div id="preview-festlogo" class="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                            <div id="preview-festlogo"
+                                class="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                                 <i class="fi fi-rr-picture text-gray-300"></i>
                             </div>
                         </div>
@@ -1542,7 +1605,9 @@
                 <input type="checkbox" id="perm-inner-dashboard"
                     class="w-4 h-4 text-brand-blue bg-gray-100 border-gray-300 rounded focus:ring-brand-blue">
                 <div class="flex flex-col">
-                    <span class="text-[13px] font-bold text-gray-700 group-hover:text-indigo-700 transition-colors">Inner Dashboard</span>
+                    <span
+                        class="text-[13px] font-bold text-gray-700 group-hover:text-indigo-700 transition-colors">Inner
+                        Dashboard</span>
                     <span class="text-[11px] text-gray-400">Can access administrative settings page.</span>
                 </div>
             </label>
@@ -1586,9 +1651,10 @@
                 <input type="checkbox" id="perm-block-access"
                     class="w-4 h-4 text-brand-red bg-gray-100 border-gray-300 rounded focus:ring-brand-red">
                 <div class="flex flex-col">
-                    <span
-                        class="text-[13px] font-bold text-gray-700 group-hover:text-red-700 transition-colors">Disable Website Editor</span>
-                    <span class="text-[11px] text-gray-400">If enabled, this user will be restricted from using the website.</span>
+                    <span class="text-[13px] font-bold text-gray-700 group-hover:text-red-700 transition-colors">Disable
+                        Website Editor</span>
+                    <span class="text-[11px] text-gray-400">If enabled, this user will be restricted from using the
+                        website.</span>
                 </div>
             </label>
         </div>
@@ -1616,24 +1682,24 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
-        // ── Auth Guard ─────────────────────────────────────────────────
-        (function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            const userRole = localStorage.getItem('userRole');
-            const innerDashboardAccess = localStorage.getItem('innerDashboard') === 'true';
-            const isSemiOwner = localStorage.getItem('semiOwner') === 'true';
+            // ── Auth Guard ─────────────────────────────────────────────────
+            (function () {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                const userRole = localStorage.getItem('userRole');
+                const innerDashboardAccess = localStorage.getItem('innerDashboard') === 'true';
+                const isSemiOwner = localStorage.getItem('semiOwner') === 'true';
 
-            if (isLoggedIn !== 'true') {
-                window.location.href = 'index.html';
-                return;
-            }
+                if (isLoggedIn !== 'true') {
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-            // Only owner and users with 'innerDashboard' permission (or semi-owners) can access
-            if (userRole !== 'owner' && !isSemiOwner && !innerDashboardAccess) {
-                // If they don't have access, send them back to the main dashboard
-                window.location.href = 'dashboard.html';
-            }
-        })();
+                // Only owner and users with 'innerDashboard' permission (or semi-owners) can access
+                if (userRole !== 'owner' && !isSemiOwner && !innerDashboardAccess) {
+                    // If they don't have access, send them back to the main dashboard
+                    window.location.href = 'dashboard.html';
+                }
+            })();
 
         // Roles and permissions are now handled dynamically via localStorage inside functions
 
@@ -1668,7 +1734,7 @@
             const logo = logos.logo192 || logos.logo512 || logos.logo;
 
             [['owner-sidebar-name', name]].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.innerText = val; });
-            
+
             const avatar = document.getElementById('owner-sidebar-avatar');
             if (avatar) {
                 if (logo) {
@@ -2044,9 +2110,34 @@
             }
         });
 
+        let liveDraftEnabled = false;
+
         // Real-time Listeners
         db.collection('config').doc('festData').onSnapshot(doc => {
             const d = doc.exists ? doc.data() : {};
+            liveDraftEnabled = d.liveDraft === true;
+
+            const sidebarToggle = document.getElementById('sidebar-live-draft');
+            if (sidebarToggle) sidebarToggle.checked = liveDraftEnabled;
+
+            const settingsToggle = document.getElementById('edit-live-draft');
+            if (settingsToggle) settingsToggle.checked = liveDraftEnabled;
+
+            if (liveDraftEnabled) {
+                CAND_HEADERS = ['name', 'section', 'admissionNo', 'class', 'status'];
+            } else {
+                CAND_HEADERS = ['name', 'section', 'admissionNo', 'class', 'status', 'team'];
+            }
+
+            const tplDesc = document.querySelector('#tpl-bulk-candidates p');
+            if (tplDesc) {
+                if (liveDraftEnabled) {
+                    tplDesc.innerHTML = 'Download a CSV template, fill it in, then upload to add multiple candidates at once. <b class="text-amber-600">(Live Draft is ON: Teams are set up by auction, do not enter teams in CSV)</b>';
+                } else {
+                    tplDesc.innerHTML = 'Download a CSV template, fill it in, then upload to add multiple candidates at once. <b class="text-green-600">(Live Draft is OFF: You can manually enter team names in CSV)</b>';
+                }
+            }
+
             updateFestDataUI(d.name || 'ArtFest', d.isActive !== false, { logo: d.logo, logo192: d.logo192, logo512: d.logo512 });
         });
 
@@ -2241,10 +2332,12 @@
                 document.getElementById('edit-festname').value = d.name || '';
                 document.getElementById('edit-festyear').value = d.year || '2026';
                 document.getElementById('edit-feststatus').checked = d.isActive !== false;
+                const draftToggle = document.getElementById('edit-live-draft');
+                if (draftToggle) draftToggle.checked = d.liveDraft === true;
                 document.getElementById('edit-festlogo').value = d.logo || '';
                 document.getElementById('edit-festlogo192').value = d.logo192 || '';
                 document.getElementById('edit-festlogo512').value = d.logo512 || '';
-                
+
                 if (d.logo) {
                     document.getElementById('preview-festlogo').innerHTML = `<img src="${d.logo}" class="w-full h-full object-cover">`;
                 } else {
@@ -2259,21 +2352,38 @@
         }
 
         function saveFestData() {
+            const draftToggle = document.getElementById('edit-live-draft');
             const payload = {
                 name: document.getElementById('edit-festname').value,
                 year: document.getElementById('edit-festyear').value || '2026',
                 isActive: document.getElementById('edit-feststatus').checked,
+                liveDraft: draftToggle ? draftToggle.checked : false,
                 logo: document.getElementById('edit-festlogo').value,
                 logo192: document.getElementById('edit-festlogo192').value,
                 logo512: document.getElementById('edit-festlogo512').value,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            db.collection('config').doc('festData').set(payload, { merge: true }).then(() => { 
-                showToast('<b>✅</b> Fest data updated!'); 
-                closeFestData(); 
+            db.collection('config').doc('festData').set(payload, { merge: true }).then(() => {
+                showToast('<b>✅</b> Fest data updated!');
+                closeFestData();
             }).catch(err => showToast('<b>❌</b> ' + err.message));
         }
+
+        window.toggleLiveDraft = function (checked) {
+            db.collection('config').doc('festData').set({
+                liveDraft: checked,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(() => {
+                showToast(`<b>✅</b> Live Draft turned ${checked ? 'ON' : 'OFF'}`);
+            }).catch(err => {
+                showToast('<b>❌</b> ' + err.message);
+                const sidebarToggle = document.getElementById('sidebar-live-draft');
+                if (sidebarToggle) sidebarToggle.checked = !checked;
+                const settingsToggle = document.getElementById('edit-live-draft');
+                if (settingsToggle) settingsToggle.checked = !checked;
+            });
+        };
 
         function closeAllSidebars() { closeManageAccount(); closeFestData(); closeLimitSidebar(); }
 
@@ -2668,7 +2778,7 @@
             const title = document.getElementById('alertTitle').value;
             const desc = document.getElementById('alertDesc').value;
             const target = document.getElementById('alertTarget').value;
-            
+
             const btn = document.getElementById('btn-send-alert');
             const origHTML = btn.innerHTML;
             btn.disabled = true;
@@ -2685,7 +2795,7 @@
                 showToast("<b>✅</b> Alert sent successfully");
                 document.getElementById('alertForm').reset();
                 loadAlertsHistory();
-            } catch(err) {
+            } catch (err) {
                 showToast("<b>❌</b> Error sending alert: " + err.message);
             } finally {
                 btn.disabled = false;
@@ -2709,10 +2819,10 @@
 
                 body.innerHTML = alerts.map(a => {
                     const date = a.createdAt ? new Date(a.createdAt.seconds * 1000).toLocaleDateString() : 'Pending...';
-                    const targetLabel = a.target === 'public' ? 
-                        '<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold">Public</span>' : 
+                    const targetLabel = a.target === 'public' ?
+                        '<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold">Public</span>' :
                         '<span class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded-full text-[10px] font-bold">Team</span>';
-                    
+
                     return `
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="px-6 py-4">
@@ -2798,7 +2908,7 @@
         // ═══════════════════════════════════════════════════════════════
         // BULK IMPORT — CANDIDATE DATA
         // ═══════════════════════════════════════════════════════════════
-        const CAND_HEADERS = ['name', 'section', 'admissionNo', 'class', 'status'];
+        let CAND_HEADERS = ['name', 'section', 'admissionNo', 'class', 'status'];
         const PROG_HEADERS = ['code', 'name', 'section', 'type', 'maxParticipants', 'status', 'progSet', 'gradeTemplate', 'positionTemplate'];
         const GRADE_HEADERS = ['templateName', 'label', 'points'];
         const POS_HEADERS = ['templateName', 'label', 'points'];
@@ -2850,6 +2960,13 @@
             if (!(r.name || '').trim()) errs.push('Name is required');
             if (!sec) errs.push('Section is required');
             else if (!bulkCandidateValidSections.some(s => s.toLowerCase() === sec.toLowerCase())) errs.push('Unknown section "' + sec + '"');
+
+            if (!liveDraftEnabled) {
+                const team = (r.team || '').trim();
+                if (team && !bulkCandidateValidTeams.some(t => t.toLowerCase() === team.toLowerCase())) {
+                    errs.push('Unknown team "' + team + '"');
+                }
+            }
             r._errors = errs;
             r._valid = errs.length === 0;
         }
@@ -2932,6 +3049,16 @@
                 if (val && !matched) opts = `<option value="${val}" selected disabled class="text-red-500">Invalid: ${val}</option>` + opts;
                 return `<select class="${baseClass} cursor-pointer" onchange="updateBulkCandidateRow(${r._index}, '${field}', this.value)">${opts}</select>`;
             }
+            if (field === 'team') {
+                let opts = `<option value="">Select Team</option>`;
+                let matched = false;
+                bulkCandidateValidTeams.forEach(t => {
+                    if (t.toLowerCase() === valLower) matched = true;
+                    opts += `<option value="${t}" ${t.toLowerCase() === valLower ? 'selected' : ''}>${t}</option>`;
+                });
+                if (val && !matched) opts = `<option value="${val}" selected disabled class="text-red-500">Invalid: ${val}</option>` + opts;
+                return `<select class="${baseClass} cursor-pointer" onchange="updateBulkCandidateRow(${r._index}, '${field}', this.value)">${opts}</select>`;
+            }
             if (field === 'status') {
                 let opts = `<option value="">Select Status</option>`;
                 let matched = false;
@@ -3002,11 +3129,12 @@
 
                 const ref = db.collection('candidates').doc();
                 batch.set(ref, {
-                    name: r.name, chestNo: generatedChestNo, team: '',
+                    name: r.name, chestNo: generatedChestNo,
+                    team: liveDraftEnabled ? '' : (r.team || ''),
                     section: r.section, class: r.class || '', admissionNo: r.admissionno || r.admissionNo || '',
-                    active: (r.status || 'active').toLowerCase() !== 'inactive', 
+                    active: (r.status || 'active').toLowerCase() !== 'inactive',
                     createdAt: ts,
-                    inAuction: true // Automatically make them available for auction
+                    inAuction: liveDraftEnabled
                 });
             });
             batch.commit()
@@ -3102,7 +3230,7 @@
                 bulkProgramValidSections = secSnap.docs.map(d => (d.data().name || '').trim());
                 window.bulkExistingCodes = progSnap.docs.map(d => String(d.data().code).trim().toLowerCase());
                 bulkProgramValidSets = setSnap.docs.map(d => (d.data().name || '').trim());
-                
+
                 window.bulkGradeTemplatesData = gradeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
                 bulkProgramValidGrades = window.bulkGradeTemplatesData.map(g => (g.name || '').trim());
 
@@ -3235,10 +3363,10 @@
             validRows.forEach(r => {
                 const ref = db.collection('programs').doc();
                 const matchedSet = allLimits.find(l => l.name.toLowerCase() === (r.progset || '').toLowerCase().trim());
-                
+
                 const gtplName = (r.gradetemplate || r.gradeTemplate || '').trim();
                 const matchedGrade = window.bulkGradeTemplatesData.find(g => g.name.toLowerCase() === gtplName.toLowerCase());
-                
+
                 const ptplName = (r.positiontemplate || r.positionTemplate || '').trim();
                 const matchedPos = window.bulkPositionTemplatesData.find(p => p.name.toLowerCase() === ptplName.toLowerCase());
 
@@ -3249,11 +3377,11 @@
                     type: r.type,
                     setId: matchedSet ? matchedSet.id : '',
                     progSet: matchedSet ? matchedSet.name : (r.progset || ''),
-                    
+
                     enableGrading: !!matchedGrade,
                     gradeTemplateId: matchedGrade ? matchedGrade.id : '',
                     gradeTemplate: matchedGrade ? matchedGrade.name : gtplName,
-                    
+
                     enableScoring: !!matchedPos,
                     positionTemplateId: matchedPos ? matchedPos.id : '',
                     positionTemplate: matchedPos ? matchedPos.name : ptplName,
@@ -3261,6 +3389,9 @@
                     maxParticipants: parseInt(r.maxparticipants || r.maxParticipants) || 1,
                     minParticipants: 1,
                     status: (r.status || 'active').toLowerCase() !== 'inactive',
+                    conceptNote: r.conceptnote || r.conceptNote || '',
+                    timeLimit: r.timelimit || r.timeLimit || '',
+                    skillRequired: r.skillrequired || r.skillRequired || '',
                     createdAt: ts
                 });
             });
@@ -3332,7 +3463,7 @@
             const errBox = document.getElementById(`bulk-${type === 'grade' ? 'grade' : 'pos'}-errors`);
             const tableBox = document.getElementById(`bulk-${type === 'grade' ? 'grade' : 'pos'}-table`);
             const countEl = document.getElementById(`bulk-${type === 'grade' ? 'grade' : 'pos'}-count`);
-            
+
             preview.classList.remove('hidden');
             const totalValid = rows.filter(r => r._valid).length;
             const totalError = rows.length - totalValid;
@@ -3370,7 +3501,7 @@
             const rows = type === 'grade' ? bulkGradeTplRows : bulkPosTplRows;
             const validRows = rows.filter(r => r._valid);
             if (!validRows.length) return showToast('<b>⚠️</b> No valid rows to import.');
-            
+
             const btn = document.getElementById(type === 'grade' ? 'btn-import-grades' : 'btn-import-pos');
             btn.disabled = true; btn.innerText = 'Importing...';
 
@@ -3386,7 +3517,7 @@
                 const ts = firebase.firestore.FieldValue.serverTimestamp();
                 const col = type === 'grade' ? 'gradeTemplates' : 'positionTemplates';
                 const batch = db.batch();
-                
+
                 for (const name in groups) {
                     const ref = db.collection(col).doc();
                     batch.set(ref, {
@@ -3397,7 +3528,7 @@
                         updatedAt: ts
                     });
                 }
-                
+
                 await batch.commit();
                 showToast(`<b>✅</b> ${Object.keys(groups).length} templates imported!`);
                 if (type === 'grade') bulkGradeTplRows = []; else bulkPosTplRows = [];
@@ -3752,10 +3883,10 @@
             const content = document.getElementById('newsContent').value;
             const date = document.getElementById('newsDate').value;
             const file = document.getElementById('newsImage').files[0];
-            
+
             try {
                 let imageUrl = null;
-                
+
                 if (file) {
                     btn.innerText = 'Uploading Image...';
                     const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/duexban9y/auto/upload";
@@ -3763,10 +3894,10 @@
                     const formData = new FormData();
                     formData.append('file', file);
                     formData.append('upload_preset', CLOUDINARY_PRESET);
-                    
+
                     const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
                     const data = await res.json();
-                    
+
                     if (data.secure_url) {
                         imageUrl = data.secure_url;
                     } else {
@@ -3775,9 +3906,9 @@
                 } else if (!id) {
                     throw new Error("Image is required for a new entry");
                 }
-                
+
                 btn.innerText = 'Saving...';
-                
+
                 const newsData = {
                     title,
                     content,
@@ -3801,7 +3932,7 @@
 
                 resetNewsForm();
                 // Optionally reload data if we are switching to manage tab or just reset
-                
+
             } catch (err) {
                 console.error(err);
                 showToast('<b>❌</b> Error: ' + err.message);
@@ -3815,7 +3946,7 @@
             try {
                 const snap = await db.collection('news').orderBy('createdAt', 'desc').get();
                 currentNews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
+
                 // Render Manage Tab
                 const manageBody = document.getElementById('news-manage-body');
                 if (currentNews.length === 0) {
@@ -3872,7 +4003,7 @@
             document.getElementById('newsContent').value = news.content;
             document.getElementById('newsDate').value = news.date;
             document.getElementById('newsImage').required = false; // not required when editing
-            
+
             document.getElementById('btn-submit-news').innerHTML = '<i class="fi fi-rr-disk"></i> Update News';
             document.getElementById('btn-cancel-edit-news').classList.remove('hidden');
 
@@ -3907,7 +4038,7 @@
                 snap.docs.forEach(doc => {
                     batch.update(db.collection('news').doc(doc.id), { isMain: false });
                 });
-                
+
                 // Set the selected one to isMain = true
                 batch.update(db.collection('news').doc(selected.value), { isMain: true });
 

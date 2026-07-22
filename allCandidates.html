@@ -338,6 +338,19 @@
                         </div>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Team</label>
+                    <div class="relative">
+                        <select id="candTeam"
+                            class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] appearance-none cursor-pointer">
+                            <option value="">Waiting for Auction...</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                            <i class="fi fi-rr-angle-small-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-span-1 sm:col-span-2 flex items-center mt-2">
                     <label class="relative inline-flex items-center cursor-pointer group">
                         <input type="checkbox" id="candActive" class="sr-only peer" checked>
@@ -369,6 +382,7 @@
         var candidatesData = [];
         var userRole = localStorage.getItem('userRole');
         var isTeamManager = userRole === 'Team Manager';
+        var liveDraftEnabled = false;
 
         if (isTeamManager) {
             // Hide the Create Candidate button for Team Managers
@@ -545,6 +559,17 @@
                 const initial = cand.name ? cand.name.charAt(0).toUpperCase() : '?';
                 const teamColorHex = getTeamColor(cand.team);
                 const isSelected = selectedIds.has(cand.id);
+                const isCap = cand.isCaptain || (cand.chestNo && cand.team && (() => {
+                    const teamObj = activeTeamsData.find(t => t.name === cand.team);
+                    return teamObj && teamObj.chestNoSeries && String(cand.chestNo) === String(parseInt(teamObj.chestNoSeries) + 1);
+                })());
+                const isAsst = cand.isAssistantCaptain || (cand.chestNo && cand.team && (() => {
+                    const teamObj = activeTeamsData.find(t => t.name === cand.team);
+                    return teamObj && teamObj.chestNoSeries && String(cand.chestNo) === String(parseInt(teamObj.chestNoSeries) + 2);
+                })());
+                const roleBadge = isCap 
+                    ? `<span class="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[9px] font-bold uppercase tracking-wider shrink-0">Captain</span>` 
+                    : (isAsst ? `<span class="ml-2 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-[9px] font-bold uppercase tracking-wider shrink-0">Asst Captain</span>` : '');
 
                 // Card & Row styling based on selection
                 const cardBorder = isSelected ? 'border-2 border-[#FFC107]' : 'border border-gray-200';
@@ -565,7 +590,7 @@
                             ${avatarContent}
                         </div>
                         <div class="flex flex-col items-start">
-                            <span onclick="window.viewCandidate('${cand.id}', event)" class="text-[14px] font-medium text-gray-900 leading-snug hover:text-brand-blue hover:underline cursor-pointer transition-colors">${cand.name}</span>
+                            <span onclick="window.viewCandidate('${cand.id}', event)" class="text-[14px] font-medium text-gray-900 leading-snug hover:text-brand-blue hover:underline cursor-pointer transition-colors flex items-center">${cand.name}${roleBadge}</span>
                             ${!isTeamManager ? `<div class="text-[12.5px] text-[#6B7280] font-mono-custom mt-0.5 tracking-tight">#${cand.chestNo} &bull; Adm: ${cand.admissionNo}</div>` : ''}
                         </div>
                     </div>
@@ -593,7 +618,7 @@
                             ${avatarContent}
                         </div>
                         <div class="flex-1 pt-0.5">
-                            <div onclick="window.viewCandidate('${cand.id}', event)" class="text-[14.5px] font-semibold text-gray-900 pr-8 hover:text-brand-blue hover:underline cursor-pointer transition-colors w-max">${cand.name}</div>
+                            <div onclick="window.viewCandidate('${cand.id}', event)" class="text-[14.5px] font-semibold text-gray-900 pr-8 hover:text-brand-blue hover:underline cursor-pointer transition-colors flex items-center w-max">${cand.name}${roleBadge}</div>
                             <div class="flex items-center space-x-2 mt-1">
                                 ${!isTeamManager ? `<span class="text-[12.5px] text-[#6B7280] font-mono-custom tracking-tight">#${cand.chestNo} &bull; Adm: ${cand.admissionNo}</span>` : ''}
                                 <span class="px-2.5 py-1 bg-white border border-gray-200 rounded-full text-[10px] font-medium text-gray-600 shadow-sm leading-tight">${cand.section}</span>
@@ -780,7 +805,7 @@
         }
 
         window.reassignChestNumbers = async function() {
-            if (!confirm('\u26a0\ufe0f This will REASSIGN chest numbers for ALL candidates based on their team Series:\n\nSeries 100 \u2192 101, 102...\nSeries 200 \u2192 201, 202...\nSeries 300 \u2192 301, 302...\n\nThis action cannot be undone. Continue?')) return;
+            if (!confirm('⚠️ This will REASSIGN chest numbers for ALL candidates based on their team Series:\n\nSeries 100 → 101, 102...\nSeries 200 → 201, 202...\nSeries 300 → 301, 302...\n\nThis action cannot be undone. Continue?')) return;
 
             const btn = document.getElementById('btn-reassign-chest');
             const origHtml = btn.innerHTML;
@@ -794,7 +819,7 @@
                     .sort((a, b) => parseInt(a.chestNoSeries) - parseInt(b.chestNoSeries));
 
                 if (sortedTeams.length === 0) {
-                    typeof showToast === 'function' && showToast('\u274c No teams with chest series found. Set "Chest No. Series Base" in Teams settings first.');
+                    typeof showToast === 'function' && showToast('❌ No teams with chest series found. Set "Chest No. Series Base" in Teams settings first.');
                     return;
                 }
 
@@ -806,37 +831,64 @@
                     else console.warn('Skipping (no team):', c.name, c.team);
                 });
 
-                // Within each team, sort by current chest number (preserves relative order)
-                sortedTeams.forEach(t => {
-                    byTeam[t.name].sort((a, b) => {
-                        const nA = parseInt(String(a.chestNo).replace(/\D/g, ''), 10) || 0;
-                        const nB = parseInt(String(b.chestNo).replace(/\D/g, ''), 10) || 0;
-                        return nA - nB;
-                    });
-                });
-
                 // Build Firestore batches (max 499 ops each)
                 const BATCH_LIMIT = 499;
                 let batches = [db.batch()];
                 let opCount = 0;
 
                 sortedTeams.forEach(team => {
-                    const blockStart = parseInt(team.chestNoSeries); // e.g. 101, 201, 301
-                    byTeam[team.name].forEach((cand, i) => {
+                    const blockStart = parseInt(team.chestNoSeries); // e.g. 100, 200, 300
+                    
+                    // Identify the captain and assistant captain
+                    const captainCand = byTeam[team.name].find(c => c.isCaptain || c.name === team.captainName || (c.chestNo && String(c.chestNo) === String(blockStart + 1)));
+                    const assistantCand = byTeam[team.name].find(c => c.isAssistantCaptain || c.name === team.assistantCaptainName || (c.chestNo && String(c.chestNo) === String(blockStart + 2)));
+                    
+                    // Filter them out from other candidates
+                    const otherCands = byTeam[team.name].filter(c => c.id !== (captainCand ? captainCand.id : null) && c.id !== (assistantCand ? assistantCand.id : null));
+                    
+                    // Sort other candidates by current chest number (preserves relative order)
+                    otherCands.sort((a, b) => {
+                        const nA = parseInt(String(a.chestNo).replace(/\D/g, ''), 10) || 0;
+                        const nB = parseInt(String(b.chestNo).replace(/\D/g, ''), 10) || 0;
+                        return nA - nB;
+                    });
+
+                    // Reassign Captain (blockStart + 1)
+                    if (captainCand) {
+                        if (opCount >= BATCH_LIMIT) { batches.push(db.batch()); opCount = 0; }
+                        batches[batches.length - 1].update(
+                            db.collection('candidates').doc(captainCand.id),
+                            { chestNo: String(blockStart + 1) }
+                        );
+                        opCount++;
+                    }
+
+                    // Reassign Assistant Captain (blockStart + 2)
+                    if (assistantCand) {
+                        if (opCount >= BATCH_LIMIT) { batches.push(db.batch()); opCount = 0; }
+                        batches[batches.length - 1].update(
+                            db.collection('candidates').doc(assistantCand.id),
+                            { chestNo: String(blockStart + 2) }
+                        );
+                        opCount++;
+                    }
+
+                    // Reassign others starting from blockStart + 3
+                    otherCands.forEach((cand, i) => {
                         if (opCount >= BATCH_LIMIT) { batches.push(db.batch()); opCount = 0; }
                         batches[batches.length - 1].update(
                             db.collection('candidates').doc(cand.id),
-                            { chestNo: String(blockStart + i) }
+                            { chestNo: String(blockStart + 3 + i) }
                         );
                         opCount++;
                     });
                 });
 
                 for (const batch of batches) await batch.commit();
-                typeof showToast === 'function' && showToast(`\u2705 Reassigned chest numbers for ${opCount} candidates!`);
+                typeof showToast === 'function' && showToast(`✅ Reassigned chest numbers for ${opCount} candidates!`);
             } catch(err) {
                 console.error('Reassign error:', err);
-                typeof showToast === 'function' && showToast('\u274c Error: ' + err.message);
+                typeof showToast === 'function' && showToast('❌ Error: ' + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = origHtml;
@@ -895,12 +947,12 @@
                 });
                 chestInput.value = maxChest + 1;
             } else {
-                // Block: chestNoSeries=101 → 101-199, chestNoSeries=201 → 201-299
-                const blockStart = seriesBase;       // Start exactly at series base
+                // Block: chestNoSeries=100 → 100-199, chestNoSeries=200 → 200-299
+                const blockStart = seriesBase + 3;   // Ordinary candidates start at seriesBase + 3
                 const blockEnd   = seriesBase + 98;  // 101+98=199, 201+98=299
 
                 // Find max chest already used by THIS team within its block
-                let maxInBlock = blockStart - 1;
+                let maxInBlock = blockStart - 1;     // Starts at seriesBase + 2 (assistant chestNo)
                 candidatesData.forEach(c => {
                     if (c.team === selectedTeam) {
                         const num = parseInt(String(c.chestNo).replace(/\D/g, ''), 10) || 0;
@@ -982,6 +1034,9 @@
             window.updateClassDropdown(cand.class || '');
             document.getElementById('candActive').checked = cand.active;
 
+            const teamSelect = document.getElementById('candTeam');
+            if (teamSelect) teamSelect.value = cand.team || '';
+
             selectedImageUrl = cand.imageUrl || null;
             if (selectedImageUrl) {
                 document.getElementById('candImagePreview').innerHTML = `<img src="${selectedImageUrl}" class="w-full h-full object-cover">`;
@@ -1015,13 +1070,27 @@
             let inAuction = true;
             let status = 'available';
             let bidPrice = 0;
-            if (editingCandidateId !== null) {
-                const existing = candidatesData.find(c => c.id === editingCandidateId);
-                if (existing) {
-                    team = existing.team || '';
-                    inAuction = existing.inAuction !== undefined ? existing.inAuction : true;
-                    if (existing.status) status = existing.status;
-                    if (existing.bidPrice) bidPrice = existing.bidPrice;
+
+            if (liveDraftEnabled) {
+                if (editingCandidateId !== null) {
+                    const existing = candidatesData.find(c => c.id === editingCandidateId);
+                    if (existing) {
+                        team = existing.team || '';
+                        inAuction = existing.inAuction !== undefined ? existing.inAuction : true;
+                        if (existing.status) status = existing.status;
+                        if (existing.bidPrice) bidPrice = existing.bidPrice;
+                    }
+                }
+            } else {
+                const teamSelect = document.getElementById('candTeam');
+                team = teamSelect ? teamSelect.value : '';
+                inAuction = false;
+                if (editingCandidateId !== null) {
+                    const existing = candidatesData.find(c => c.id === editingCandidateId);
+                    if (existing) {
+                        if (existing.status) status = existing.status;
+                        if (existing.bidPrice) bidPrice = existing.bidPrice;
+                    }
                 }
             }
 
@@ -1062,6 +1131,7 @@
         if (window.candUnsub) window.candUnsub();
         if (window.candTeamsUnsub) window.candTeamsUnsub();
         if (window.candSectionsUnsub) window.candSectionsUnsub();
+        if (window.candFestDataUnsub) window.candFestDataUnsub();
 
         if (typeof db !== 'undefined') {
             // 0. All-teams color listener (no isActive filter — ensures colors always show)
@@ -1072,6 +1142,27 @@
                     if (t.name && t.color) allTeamsColorMap[t.name] = t.color;
                 });
                 renderUI();
+            });
+
+            // 0. Fest Data / Live Draft Listener
+            window.candFestDataUnsub = db.collection('config').doc('festData').onSnapshot(doc => {
+                const d = doc.exists ? doc.data() : {};
+                liveDraftEnabled = d.liveDraft === true;
+                
+                const teamSelect = document.getElementById('candTeam');
+                if (teamSelect) {
+                    teamSelect.disabled = liveDraftEnabled || isTeamManager;
+                    
+                    let defaultText = liveDraftEnabled ? 'Waiting for Auction...' : 'Select Team';
+                    let optionsHTML = `<option value="">${defaultText}</option>`;
+                    activeTeamsData.forEach(team => {
+                        optionsHTML += `<option value="${team.name}">${team.name}</option>`;
+                    });
+                    
+                    const currentVal = teamSelect.value;
+                    teamSelect.innerHTML = optionsHTML;
+                    if (currentVal) teamSelect.value = currentVal;
+                }
             });
 
             // 1. Teams Listener (Only active) — for sidebar dropdown & series data
@@ -1088,7 +1179,8 @@
                 // Populate sidebar team dropdown only if element exists
                 const teamSelect = document.getElementById('candTeam');
                 if (teamSelect) {
-                    let optionsHTML = '<option value="">Waiting for Auction...</option>';
+                    let defaultText = liveDraftEnabled ? 'Waiting for Auction...' : 'Select Team';
+                    let optionsHTML = `<option value="">${defaultText}</option>`;
                     activeTeamsData.forEach(team => {
                         optionsHTML += `<option value="${team.name}">${team.name}</option>`;
                     });
@@ -1101,7 +1193,7 @@
                     teamSelect.onchange = function () {
                         window.autoGenerateChestNo();
                     };
-                    teamSelect.disabled = true;
+                    teamSelect.disabled = liveDraftEnabled || isTeamManager;
                 }
 
                 renderUI();

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArtFest'26 Login UI</title>
+    <title>Kauthukam '26 Login UI</title>
 
     <!-- Favicon / PWA Setup -->
     <link rel="icon" href="logo-512.svg" type="image/svg+xml">
@@ -425,7 +425,7 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);" id="offline-fest-name">ArtFest'26</span>
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);" id="offline-fest-name">Kauthukam '26</span>
                 </div>
             </div>
         </div>
@@ -479,7 +479,7 @@
                 <div class="bg-white/20 rounded p-1 flex items-center justify-center overflow-hidden">
                     <img id="login-logo-desktop" src="logo-512.svg" class="w-6 h-6 object-contain" alt="Logo">
                 </div>
-                <span class="fest-name-display text-white font-bold text-lg tracking-wide">ArtFest'26</span>
+                <span class="fest-name-display text-white font-bold text-lg tracking-wide">Kauthukam '26</span>
             </div>
 
             <!-- Features with Palette Colors & Flaticons -->
@@ -519,7 +519,7 @@
                     <div class="bg-white/20 rounded p-1 flex items-center justify-center overflow-hidden">
                         <img id="login-logo-mobile" src="logo-512.svg" class="w-6 h-6 object-contain" alt="Logo">
                     </div>
-                    <span class="fest-name-display text-white font-bold text-lg tracking-wide">ArtFest'26</span>
+                    <span class="fest-name-display text-white font-bold text-lg tracking-wide">Kauthukam '26</span>
                 </div>
             </div>
 
@@ -787,8 +787,8 @@
             const fallbackLogin = () => {
                 if (user === 'admin' && pass === '81119') {
                     // Seed initial data to firestore so it isn't empty!
-                    firebase.firestore().collection('admin').doc('credentials').set({ username: 'admin', password: '81119', name: 'ArtFest' }).catch(() => { });
-                    firebase.firestore().collection('config').doc('festData').set({ name: 'ArtFest', isActive: true }).catch(() => { });
+                    firebase.firestore().collection('admin').doc('credentials').set({ username: 'admin', password: '81119', name: 'Kauthukam' }).catch(() => { });
+                    firebase.firestore().collection('config').doc('festData').set({ name: 'Kauthukam', isActive: true }).catch(() => { });
 
                     showToast('<b>✅</b> Successfully logged in!');
                     localStorage.setItem('isLoggedIn', 'true');
@@ -816,8 +816,8 @@
                 if ((user === validUser && pass === validPass) || (user === 'admin' && pass === '81119')) {
                     // Owner login — always allowed
                     if (!doc.exists) {
-                        dbRef.set({ username: 'admin', password: '81119', name: 'ArtFest' }).catch(() => { });
-                        firebase.firestore().collection('config').doc('festData').set({ name: 'ArtFest', isActive: true }).catch(() => { });
+                        dbRef.set({ username: 'admin', password: '81119', name: 'Kauthukam' }).catch(() => { });
+                        firebase.firestore().collection('config').doc('festData').set({ name: 'Kauthukam', isActive: true }).catch(() => { });
                     }
                     showToast('<b>✅</b> Successfully logged in!');
                     localStorage.setItem('isLoggedIn', 'true');

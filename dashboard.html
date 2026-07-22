@@ -459,11 +459,15 @@
 
                 <div class="flex items-center gap-4 relative">
                     <!-- Notifications -->
-                    <div class="relative hidden cursor-pointer" id="notification-container" onclick="toggleNotificationModal()">
-                        <div class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                    <div class="relative hidden cursor-pointer" id="notification-container"
+                        onclick="toggleNotificationModal()">
+                        <div
+                            class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
                             <i class="fi fi-rr-bell text-gray-600"></i>
                         </div>
-                        <div id="notification-count" class="absolute -top-1 -right-1 bg-brand-red text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white hidden">0</div>
+                        <div id="notification-count"
+                            class="absolute -top-1 -right-1 bg-brand-red text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white hidden">
+                            0</div>
                     </div>
 
                     <!-- Removed Upgrade Button as requested by Red Marker -->
@@ -665,7 +669,8 @@
                                         <h2 class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Fest
                                             Users</h2>
                                     </div>
-                                    <button id="btn-manage-users" onclick="location.href='innerDashboard.html?tab=users'"
+                                    <button id="btn-manage-users"
+                                        onclick="location.href='innerDashboard.html?tab=users'"
                                         class="bg-[#FFB33F] text-gray-900 px-4 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#FFB33F]/90 transition-colors flex items-center justify-center gap-2">
                                         <i class="fi fi-rr-user-add text-[10px]"></i> Manage
                                     </button>
@@ -742,11 +747,15 @@
         onclick="closeAllSidebars()"></div>
 
     <!-- Notification Modal -->
-    <div id="notificationModalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[80] hidden" onclick="toggleNotificationModal()"></div>
-    <div id="notificationModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-[90] w-[90%] max-w-lg hidden overflow-hidden flex flex-col max-h-[80vh]">
+    <div id="notificationModalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[80] hidden"
+        onclick="toggleNotificationModal()"></div>
+    <div id="notificationModal"
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-[90] w-[90%] max-w-lg hidden overflow-hidden flex flex-col max-h-[80vh]">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2"><i class="fi fi-rr-bell text-brand-red"></i> Team Alerts</h2>
-            <button onclick="toggleNotificationModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i class="fi fi-rr-cross"></i></button>
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2"><i
+                    class="fi fi-rr-bell text-brand-red"></i> Team Alerts</h2>
+            <button onclick="toggleNotificationModal()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                    class="fi fi-rr-cross"></i></button>
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-white" id="notification-list">
             <div class="text-center text-gray-400 py-6 text-sm">Loading alerts...</div>
@@ -754,16 +763,20 @@
     </div>
 
     <!-- Alert Detail Modal -->
-    <div id="alertDetailOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-[100] hidden" onclick="closeAlertDetail()"></div>
-    <div id="alertDetailModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-[110] w-[90%] max-w-md hidden flex flex-col overflow-hidden">
+    <div id="alertDetailOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-[100] hidden"
+        onclick="closeAlertDetail()"></div>
+    <div id="alertDetailModal"
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl z-[110] w-[90%] max-w-md hidden flex flex-col overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50">
             <h2 class="text-[16px] font-bold text-gray-800" id="alert-detail-title">Alert Title</h2>
-            <button onclick="closeAlertDetail()" class="text-gray-400 hover:text-gray-700 transition-colors"><i class="fi fi-rr-cross"></i></button>
+            <button onclick="closeAlertDetail()" class="text-gray-400 hover:text-gray-700 transition-colors"><i
+                    class="fi fi-rr-cross"></i></button>
         </div>
         <div class="p-6 bg-white overflow-y-auto">
             <p class="text-gray-600 text-[14px] leading-relaxed whitespace-pre-wrap" id="alert-detail-desc"></p>
             <div class="mt-6 flex justify-end">
-                <button onclick="closeAlertDetail()" class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-200 transition-colors">Close</button>
+                <button onclick="closeAlertDetail()"
+                    class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-200 transition-colors">Close</button>
             </div>
         </div>
     </div>
@@ -844,31 +857,41 @@
                     </div>
                 </label>
             </div>
-            
+
             <!-- Logo 192x192 -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">App Icon / Logo (192x192)</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">App Icon / Logo
+                    (192x192)</label>
                 <div class="flex items-center gap-4">
-                    <div id="preview-logo192" class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                    <div id="preview-logo192"
+                        class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                         <i class="fi fi-rr-picture text-gray-300 text-xl"></i>
                     </div>
                     <label class="flex-1">
-                        <span class="block w-full text-center px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-all">Choose Logo</span>
-                        <input type="file" id="input-logo192" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-logo192')">
+                        <span
+                            class="block w-full text-center px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-all">Choose
+                            Logo</span>
+                        <input type="file" id="input-logo192" accept="image/*" class="hidden"
+                            onchange="previewImage(this, 'preview-logo192')">
                     </label>
                 </div>
             </div>
 
             <!-- Logo 502x502 -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Main Logo (502x502)</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Main Logo
+                    (502x502)</label>
                 <div class="flex items-center gap-4">
-                    <div id="preview-logo502" class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                    <div id="preview-logo502"
+                        class="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                         <i class="fi fi-rr-picture text-gray-300 text-xl"></i>
                     </div>
                     <label class="flex-1">
-                        <span class="block w-full text-center px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-all">Choose Logo</span>
-                        <input type="file" id="input-logo502" accept="image/*" class="hidden" onchange="previewImage(this, 'preview-logo502')">
+                        <span
+                            class="block w-full text-center px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-all">Choose
+                            Logo</span>
+                        <input type="file" id="input-logo502" accept="image/*" class="hidden"
+                            onchange="previewImage(this, 'preview-logo502')">
                     </label>
                 </div>
             </div>
@@ -1011,13 +1034,13 @@
             const festDataLink = document.getElementById('fest-data-link');
             const isAsstOwner = localStorage.getItem('semiOwner') === 'true';
             const hasInnerAccess = localStorage.getItem('innerDashboard') === 'true';
-            
+
             if (festDataLink) festDataLink.classList.toggle('hidden', role.toLowerCase() !== 'owner' && !isAsstOwner);
 
             // Hide settings/inner dashboard links if not permitted
             const setLink = document.getElementById('sidebar-settings-link');
             const manageBtn = document.getElementById('btn-manage-users'); // I'll add this ID to the button in the card
-            
+
             if (role.toLowerCase() !== 'owner' && !isAsstOwner && !hasInnerAccess) {
                 if (setLink) setLink.classList.add('hidden');
                 if (manageBtn) manageBtn.classList.add('hidden');
@@ -1045,9 +1068,9 @@
             const sbStatus = document.getElementById('sidebar-fest-status');
 
             if (sbName) sbName.innerText = name || 'Festival Name';
-            
+
             const mainLogo = mainLogoOverride || logo192 || logo502;
-            
+
             if (sbAvatar) {
                 if (mainLogo) {
                     sbAvatar.innerHTML = `<img src="${mainLogo}" class="w-full h-full object-contain rounded-[12px] bg-white p-0.5">`;
@@ -1465,7 +1488,7 @@
             statsUnsub.push(db.collection('programs').onSnapshot(s => {
                 const statProgEl = document.getElementById('stat-programs');
                 if (statProgEl) statProgEl.innerText = s.size;
-                
+
                 const statResEl = document.getElementById('stat-results');
                 if (statResEl) {
                     let publishedCount = 0;
@@ -1561,17 +1584,17 @@
                 document.getElementById('edit-festname').value = d.name || '';
                 document.getElementById('edit-festyear').value = d.year || '2026';
                 document.getElementById('edit-feststatus').checked = d.isActive !== false;
-                
+
                 // Previews
                 const p192 = document.getElementById('preview-logo192');
                 const p502 = document.getElementById('preview-logo502');
-                
+
                 if (d.logo192) p192.innerHTML = `<img src="${d.logo192}" class="w-full h-full object-cover">`;
                 else p192.innerHTML = `<i class="fi fi-rr-picture text-gray-300 text-xl"></i>`;
-                
+
                 if (d.logo502) p502.innerHTML = `<img src="${d.logo502}" class="w-full h-full object-cover">`;
                 else p502.innerHTML = `<i class="fi fi-rr-picture text-gray-300 text-xl"></i>`;
-                
+
                 // Reset file inputs
                 document.getElementById('input-logo192').value = '';
                 document.getElementById('input-logo502').value = '';
@@ -1588,18 +1611,18 @@
                 const name = document.getElementById('edit-festname').value;
                 const year = document.getElementById('edit-festyear').value || '2026';
                 const isActive = document.getElementById('edit-feststatus').checked;
-                
+
                 const file192 = document.getElementById('input-logo192').files[0];
                 const file502 = document.getElementById('input-logo502').files[0];
-                
+
                 const updateData = { name, year, isActive };
-                
+
                 if (file192) {
                     const ref192 = firebase.storage().ref().child('fest/logo192_' + Date.now());
                     await ref192.put(file192);
                     updateData.logo192 = await ref192.getDownloadURL();
                 }
-                
+
                 if (file502) {
                     const ref502 = firebase.storage().ref().child('fest/logo502_' + Date.now());
                     await ref502.put(file502);
@@ -1654,7 +1677,7 @@
         function listenForAlerts() {
             const role = localStorage.getItem('userRole');
             if (role !== 'Team Manager') return;
-            
+
             const container = document.getElementById('notification-container');
             if (container) container.classList.remove('hidden');
 
@@ -1674,7 +1697,7 @@
             const userId = localStorage.getItem('festUserId');
             const unreadCount = activeAlerts.filter(a => !(a.readBy || []).includes(userId)).length;
             const badge = document.getElementById('notification-count');
-            
+
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
                 badge.classList.remove('hidden');
@@ -1716,7 +1739,7 @@
 
             document.getElementById('alert-detail-title').textContent = alert.title;
             document.getElementById('alert-detail-desc').textContent = alert.description;
-            
+
             document.getElementById('alertDetailOverlay').classList.remove('hidden');
             document.getElementById('alertDetailModal').classList.remove('hidden');
 
@@ -1817,8 +1840,10 @@
     </script>
 
     <!-- Notification Modal -->
-    <div id="notificationModalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] hidden" onclick="toggleNotificationModal()"></div>
-    <div id="notificationModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[2rem] shadow-2xl z-[90] hidden overflow-hidden animate-in">
+    <div id="notificationModalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] hidden"
+        onclick="toggleNotificationModal()"></div>
+    <div id="notificationModal"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[2rem] shadow-2xl z-[90] hidden overflow-hidden animate-in">
         <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 class="font-black text-gray-800 flex items-center gap-2">
                 <i class="fi fi-rr-bell text-red-500"></i> Team Alerts
@@ -1833,10 +1858,13 @@
     </div>
 
     <!-- Alert Detail Modal -->
-    <div id="alertDetailOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] hidden" onclick="closeAlertDetail()"></div>
-    <div id="alertDetailModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3)] z-[110] hidden overflow-hidden animate-in">
+    <div id="alertDetailOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] hidden"
+        onclick="closeAlertDetail()"></div>
+    <div id="alertDetailModal"
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3)] z-[110] hidden overflow-hidden animate-in">
         <div class="p-8 pb-0 flex justify-end">
-            <button onclick="closeAlertDetail()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-all">
+            <button onclick="closeAlertDetail()"
+                class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-all">
                 <i class="fi fi-rr-cross-small"></i>
             </button>
         </div>
@@ -1845,10 +1873,12 @@
                 <i class="fi fi-rr-bell-ring text-3xl"></i>
             </div>
             <h2 id="alert-detail-title" class="text-2xl font-black text-gray-900 mb-4 leading-tight">Alert Title</h2>
-            <div class="bg-gray-50 rounded-2xl p-6 text-gray-600 text-sm leading-relaxed text-left" id="alert-detail-desc">
+            <div class="bg-gray-50 rounded-2xl p-6 text-gray-600 text-sm leading-relaxed text-left"
+                id="alert-detail-desc">
                 Alert description goes here...
             </div>
-            <button onclick="closeAlertDetail()" class="mt-8 w-full py-4 bg-gray-900 text-white rounded-2xl font-bold shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
+            <button onclick="closeAlertDetail()"
+                class="mt-8 w-full py-4 bg-gray-900 text-white rounded-2xl font-bold shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
                 I Understand
             </button>
         </div>

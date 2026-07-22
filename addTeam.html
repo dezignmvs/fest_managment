@@ -264,9 +264,23 @@
             </div>
             <div>
                 <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Chest No. Series Base</label>
-                <input type="number" id="teamSeries"
+                <input type="number" id="teamSeries" oninput="window.updateCaptainSeriesHint()"
                     class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all"
                     placeholder="e.g. 100, 200, 300">
+            </div>
+            <div>
+                <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Team Captain Name</label>
+                <input type="text" id="teamCaptain"
+                    class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all"
+                    placeholder="e.g. Rahul Sharma">
+                <p id="teamCaptainHint" class="text-[11px] text-gray-400 mt-1 pl-2"></p>
+            </div>
+            <div>
+                <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Assistant Captain Name</label>
+                <input type="text" id="teamAssistant"
+                    class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full text-[13px] focus:outline-none focus:ring-1 focus:ring-[#FFB33F] focus:border-[#FFB33F] transition-all"
+                    placeholder="e.g. Amit Kumar">
+                <p id="teamAssistantHint" class="text-[11px] text-gray-400 mt-1 pl-2"></p>
             </div>
             <div>
                 <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Color *</label>
@@ -438,7 +452,15 @@
                     <div class="col-span-1">${isSelected ? getCheckedIcon(d.id) : getUncheckedIcon(d.id)}</div>
                     <div class="col-span-4 flex items-center space-x-3.5">
                         <i class="fi fi-rr-graphic-style text-[18px]" style="color: ${d.color};"></i>
-                        <span class="text-[14px] font-medium text-gray-900 leading-snug">${d.name}</span>
+                        <div class="flex flex-col">
+                            <span class="text-[14px] font-medium text-gray-900 leading-snug">${d.name}</span>
+                            ${d.captainName || d.assistantCaptainName ? `
+                            <span class="text-[11px] text-gray-400 mt-0.5">
+                                ${d.captainName ? `C: ${d.captainName} (#${(parseInt(d.chestNoSeries) || 0) + 1})` : ''}
+                                ${d.captainName && d.assistantCaptainName ? ' | ' : ''}
+                                ${d.assistantCaptainName ? `AC: ${d.assistantCaptainName} (#${(parseInt(d.chestNoSeries) || 0) + 2})` : ''}
+                            </span>` : ''}
+                        </div>
                     </div>
                     <div class="col-span-2 flex items-center space-x-2">
                         <span class="w-[7px] h-[7px] rounded-full" style="background-color: ${d.color}"></span>
@@ -462,6 +484,11 @@
                                 <span class="text-[12px] text-[#6B7280] font-mono-custom tracking-tight uppercase">${d.color}</span>
                             </div>
                             <div class="text-[12px] text-gray-500 mt-2 font-mono-custom">Series: ${d.chestNoSeries || 'Auto'}</div>
+                            ${d.captainName || d.assistantCaptainName ? `
+                            <div class="text-[11px] text-gray-400 mt-2 space-y-0.5">
+                                ${d.captainName ? `<div>C: ${d.captainName} (#${(parseInt(d.chestNoSeries) || 0) + 1})</div>` : ''}
+                                ${d.assistantCaptainName ? `<div>AC: ${d.assistantCaptainName} (#${(parseInt(d.chestNoSeries) || 0) + 2})</div>` : ''}
+                            </div>` : ''}
                         </div>
                     </div>
                     
@@ -581,12 +608,28 @@
             if (typeof loadModule === 'function') loadModule('viewTeamData');
         };
 
+        window.updateCaptainSeriesHint = function () {
+            const seriesVal = parseInt(document.getElementById('teamSeries').value) || 0;
+            const capHint = document.getElementById('teamCaptainHint');
+            const asstHint = document.getElementById('teamAssistantHint');
+            if (seriesVal > 0) {
+                capHint.innerText = `Will be assigned Chest No: ${seriesVal + 1}`;
+                asstHint.innerText = `Will be assigned Chest No: ${seriesVal + 2}`;
+            } else {
+                capHint.innerText = '';
+                asstHint.innerText = '';
+            }
+        };
+
         window.openTeamSidebar = function () {
             editingTeamId = null;
             document.getElementById('teamSidebarTitle').innerText = "Add Team";
             document.getElementById('btn-save-team-text').innerText = "Save Team";
             document.getElementById('teamName').value = '';
             document.getElementById('teamSeries').value = '';
+            document.getElementById('teamCaptain').value = '';
+            document.getElementById('teamAssistant').value = '';
+            window.updateCaptainSeriesHint();
             document.getElementById('teamColorPicker').value = '#FF0000';
             document.getElementById('teamColorText').value = '#FF0000';
             document.getElementById('teamActive').checked = true;
@@ -605,6 +648,9 @@
             document.getElementById('btn-save-team-text').innerText = "Update Team";
             document.getElementById('teamName').value = team.name;
             document.getElementById('teamSeries').value = team.chestNoSeries || '';
+            document.getElementById('teamCaptain').value = team.captainName || '';
+            document.getElementById('teamAssistant').value = team.assistantCaptainName || '';
+            window.updateCaptainSeriesHint();
             document.getElementById('teamColorPicker').value = team.color;
             document.getElementById('teamColorText').value = team.color;
             document.getElementById('teamActive').checked = team.isActive;
@@ -617,14 +663,95 @@
             document.getElementById('teamSidebar').classList.add('translate-x-full');
         };
 
+        async function syncCaptainsToCandidates(teamName, series, captainName, assistantName) {
+            if (typeof db === 'undefined' || !series) return;
+            const capChest = String(series + 1);
+            const asstChest = String(series + 2);
+
+            try {
+                // Sync Captain
+                if (captainName) {
+                    const capSnap = await db.collection('candidates').where('chestNo', '==', capChest).get();
+                    if (!capSnap.empty) {
+                        await db.collection('candidates').doc(capSnap.docs[0].id).update({
+                            name: captainName,
+                            team: teamName,
+                            isCaptain: true,
+                            isAssistantCaptain: false,
+                            isActive: true
+                        });
+                    } else {
+                        await db.collection('candidates').add({
+                            name: captainName,
+                            chestNo: capChest,
+                            team: teamName,
+                            isActive: true,
+                            isCaptain: true,
+                            isAssistantCaptain: false,
+                            section: "General"
+                        });
+                    }
+                } else {
+                    const capSnap = await db.collection('candidates').where('chestNo', '==', capChest).get();
+                    if (!capSnap.empty) {
+                        await db.collection('candidates').doc(capSnap.docs[0].id).update({
+                            isCaptain: false
+                        });
+                    }
+                }
+
+                // Sync Assistant Captain
+                if (assistantName) {
+                    const asstSnap = await db.collection('candidates').where('chestNo', '==', asstChest).get();
+                    if (!asstSnap.empty) {
+                        await db.collection('candidates').doc(asstSnap.docs[0].id).update({
+                            name: assistantName,
+                            team: teamName,
+                            isCaptain: false,
+                            isAssistantCaptain: true,
+                            isActive: true
+                        });
+                    } else {
+                        await db.collection('candidates').add({
+                            name: assistantName,
+                            chestNo: asstChest,
+                            team: teamName,
+                            isActive: true,
+                            isCaptain: false,
+                            isAssistantCaptain: true,
+                            section: "General"
+                        });
+                    }
+                } else {
+                    const asstSnap = await db.collection('candidates').where('chestNo', '==', asstChest).get();
+                    if (!asstSnap.empty) {
+                        await db.collection('candidates').doc(asstSnap.docs[0].id).update({
+                            isAssistantCaptain: false
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error syncing captains to candidates:", err);
+            }
+        }
+
         window.saveTeam = function () {
             const name = document.getElementById('teamName').value.trim();
             const color = document.getElementById('teamColorText').value.trim();
             const isActive = document.getElementById('teamActive').checked;
             const series = parseInt(document.getElementById('teamSeries').value) || 0;
+            const captain = document.getElementById('teamCaptain').value.trim();
+            const assistant = document.getElementById('teamAssistant').value.trim();
             if (!name) return typeof showToast === 'function' ? showToast("❌ Team Name is required!") : alert("Name required");
 
-            const payload = { name, color, isActive, chestNoSeries: series };
+            const payload = { 
+                name, 
+                color, 
+                isActive, 
+                chestNoSeries: series,
+                captainName: captain,
+                assistantCaptainName: assistant
+            };
             if (typeof firebase !== 'undefined' && firebase.firestore) {
                 payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
             }
@@ -632,8 +759,10 @@
             if (editingTeamId) {
                 if (typeof db !== 'undefined') {
                     db.collection('teams').doc(editingTeamId).update(payload).then(() => {
-                        window.closeTeamSidebar();
-                        typeof showToast === 'function' && showToast("✅ Team updated!");
+                        syncCaptainsToCandidates(name, series, captain, assistant).then(() => {
+                            window.closeTeamSidebar();
+                            typeof showToast === 'function' && showToast("✅ Team updated!");
+                        });
                     });
                 } else {
                     const team = teamsData.find(t => t.id === editingTeamId);
@@ -647,8 +776,10 @@
                         payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     }
                     db.collection('teams').add(payload).then(() => {
-                        window.closeTeamSidebar();
-                        typeof showToast === 'function' && showToast("✅ Team added!");
+                        syncCaptainsToCandidates(name, series, captain, assistant).then(() => {
+                            window.closeTeamSidebar();
+                            typeof showToast === 'function' && showToast("✅ Team added!");
+                        });
                     });
                 } else {
                     teamsData.unshift({ id: Date.now().toString(), ...payload });

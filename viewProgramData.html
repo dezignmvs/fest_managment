@@ -258,6 +258,12 @@
                                     <div id="vp-desc" class="text-[13.5px] text-gray-400">No description available</div>
                                 </div>
 
+                                <div>
+                                    <div class="text-[13px] text-gray-500 font-medium mb-1 border-b border-transparent">
+                                        Concept Note</div>
+                                    <div id="vp-concept-note" class="text-[13.5px] text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-200 leading-relaxed whitespace-pre-wrap">No concept note available</div>
+                                </div>
+
                                 <div
                                     class="border border-gray-100 rounded-2xl p-6 space-y-6 bg-[#FAFAFA]/50 shadow-sm mt-4">
                                     <div class="flex items-start gap-4">
@@ -291,6 +297,28 @@
                                                 Venue</div>
                                             <div id="vp-venue" class="text-[14px] font-bold mt-0.5 text-gray-900">No
                                                 venue assigned</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-4">
+                                        <div
+                                            class="w-9 h-9 rounded-full bg-indigo-50 flex flex-shrink-0 items-center justify-center border border-indigo-100/50">
+                                            <i class="fi fi-rr-clock text-indigo-500 text-sm"></i></div>
+                                        <div class="pt-0.5">
+                                            <div class="text-[11px] text-gray-500 uppercase font-bold tracking-widest">
+                                                Time Limit</div>
+                                            <div id="vp-time-limit" class="text-[14px] font-bold mt-0.5 text-gray-900">—
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-4">
+                                        <div
+                                            class="w-9 h-9 rounded-full bg-purple-50 flex flex-shrink-0 items-center justify-center border border-purple-100/50">
+                                            <i class="fi fi-rr-keyboard text-purple-500 text-sm"></i></div>
+                                        <div class="pt-0.5">
+                                            <div class="text-[11px] text-gray-500 uppercase font-bold tracking-widest">
+                                                Skill Evaluated</div>
+                                            <div id="vp-skill" class="text-[14px] font-bold mt-0.5 text-gray-900">—
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-4">
@@ -620,6 +648,40 @@
                                     </div>
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <!-- Accordion 5: Concept & Skills -->
+                        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <button onclick="toggleAccordion('acc-concept', 'icon-concept')"
+                                class="w-full flex justify-between items-center p-5 bg-white hover:bg-gray-50 transition-colors focus:outline-none">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <i class="fi fi-rr-document"></i></div>
+                                    <h3 class="text-[15px] font-bold text-gray-800">Concept & Skills</h3>
+                                </div>
+                                <i id="icon-concept"
+                                    class="fi fi-rr-angle-small-down text-gray-400 transition-transform duration-300"></i>
+                            </button>
+                            <div id="acc-concept" class="hidden p-6 border-t border-gray-100 bg-gray-50/30 space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Participant Time Limit</label>
+                                        <input type="text" id="progTimeLimit" placeholder="e.g. 5 minutes each"
+                                            class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Skill Evaluated</label>
+                                        <input type="text" id="progSkill" placeholder="e.g. Typing, Speed, Public Speaking"
+                                            class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[13px] font-medium text-gray-800 mb-1.5">Concept Note</label>
+                                    <textarea id="progConceptNote" placeholder="Write the concept note or program details here..." rows="4"
+                                        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all resize-y"></textarea>
+                                </div>
                             </div>
                         </div>
 
@@ -1484,6 +1546,9 @@
                     gradeTemplateId: document.getElementById('progGrading').checked ? (document.getElementById('progGradeTemplate').value || null) : null,
                     enableScoring: document.getElementById('progScoring').checked,
                     positionTemplateId: document.getElementById('progScoring').checked ? (document.getElementById('progScoreTemplate').value || null) : null,
+                    conceptNote: document.getElementById('progConceptNote').value || '',
+                    timeLimit: document.getElementById('progTimeLimit').value || '',
+                    skillRequired: document.getElementById('progSkill').value || '',
                     updatedAt: ts
                 };
 
@@ -1721,6 +1786,9 @@
 
                     // Detail Overview
                     document.getElementById('vp-desc').innerText = p.description || 'No description available';
+                    document.getElementById('vp-concept-note').innerText = p.conceptNote || 'No concept note available';
+                    document.getElementById('vp-time-limit').innerText = p.timeLimit || '—';
+                    document.getElementById('vp-skill').innerText = p.skillRequired || '—';
                     document.getElementById('vp-section').innerText = p.section || '—';
                     
                     if (p.venueId) {
@@ -1804,6 +1872,10 @@
 
                     document.getElementById('progScoring').checked = !!p.enableScoring;
                     if (p.enableScoring && p.positionTemplateId) document.getElementById('progScoreTemplate').value = p.positionTemplateId;
+
+                    document.getElementById('progTimeLimit').value = p.timeLimit || '';
+                    document.getElementById('progSkill').value = p.skillRequired || '';
+                    document.getElementById('progConceptNote').value = p.conceptNote || '';
 
                     toggleTemplateState('progGrading', 'progGradeTemplate', 'icon-grade-template');
                     toggleTemplateState('progScoring', 'progScoreTemplate', 'icon-score-template');
