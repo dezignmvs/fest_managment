@@ -119,19 +119,16 @@
         }
 
         /* ── System Offline Screen ── */
-        @keyframes float-slow { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-18px)} }
-        @keyframes pulse-ring { 0%{transform:scale(1);opacity:.6} 70%{transform:scale(1.6);opacity:0} 100%{transform:scale(1.6);opacity:0} }
-        @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.2} }
-        @keyframes slide-up { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes orbit { from{transform:rotate(0deg) translateX(54px) rotate(0deg)} to{transform:rotate(360deg) translateX(54px) rotate(-360deg)} }
+        @keyframes slide-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
         #system-offline-screen {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 9999;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+            background: #050805;
             overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         #system-offline-screen.show {
@@ -140,125 +137,89 @@
             justify-content: center;
         }
 
-        .offline-bg-grid {
+        #matrix-canvas-admin {
             position: absolute;
             inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-            background-size: 48px 48px;
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.75;
         }
 
-        .offline-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
+        .offline-card {
+            background: rgba(5, 8, 5, 0.9);
+            border: 2px solid #39FF14;
+            border-radius: 4px;
+            padding: 40px 30px;
+            max-width: 440px;
+            width: calc(100% - 32px);
+            text-align: center;
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+            animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+            z-index: 10;
+            color: #39FF14;
         }
 
         .offline-icon-wrap {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 32px;
-        }
-
-        .offline-icon-wrap .pulse-ring {
-            position: absolute;
-            inset: -16px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            border: 2px solid rgba(239,68,68,.4);
-            animation: pulse-ring 2s cubic-bezier(.4,0,.6,1) infinite;
-        }
-
-        .offline-icon-wrap .pulse-ring:nth-child(2) { animation-delay: .6s; }
-        .offline-icon-wrap .main-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #1e1b4b, #312e81);
-            border-radius: 50%;
-            border: 2px solid rgba(239,68,68,.3);
+            background: rgba(57, 255, 20, 0.1);
+            color: #39FF14;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            z-index: 1;
-            animation: float-slow 4s ease-in-out infinite;
-            box-shadow: 0 0 40px rgba(239,68,68,.15), inset 0 1px 0 rgba(255,255,255,.05);
+            margin: 0 auto 20px auto;
+            border: 1px solid #39FF14;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+            font-size: 24px;
         }
-
-        .offline-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink-dot 1.4s ease-in-out infinite; }
-        .offline-dot:nth-child(2) { animation-delay:.2s; }
-        .offline-dot:nth-child(3) { animation-delay:.4s; }
-
-        .offline-card {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            padding: 48px 40px;
-            max-width: 480px;
-            width: 100%;
-            animation: slide-up .6s cubic-bezier(.22,1,.36,1) both;
-        }
-
-        .offline-error-code {
-            font-size: clamp(90px, 20vw, 140px);
-            font-weight: 900;
-            line-height: 1;
-            letter-spacing: -4px;
-            background: linear-gradient(135deg, #818cf8 0%, #6366f1 40%, #ef4444 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            opacity: .18;
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-        }
-
-        .offline-orbit-wrap {
-            position: absolute;
-            inset: -40px;
-            pointer-events: none;
-        }
-        .offline-orbit-dot {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            margin: -4px;
-            animation: orbit 6s linear infinite;
-        }
-        .offline-orbit-dot:nth-child(2) { width:6px;height:6px;margin:-3px; animation-delay:-2s; animation-duration:8s; }
-        .offline-orbit-dot:nth-child(3) { width:5px;height:5px;margin:-2.5px; animation-delay:-4s; animation-duration:10s; }
 
         .offline-status-bar {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 6px;
-            background: rgba(239,68,68,.08);
-            border: 1px solid rgba(239,68,68,.2);
-            border-radius: 100px;
-            padding: 6px 16px;
-            width: fit-content;
-            margin: 0 auto 24px;
+            background: rgba(57, 255, 20, 0.05);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            border-radius: 4px;
+            padding: 4px 12px;
+            margin-bottom: 16px;
         }
 
-        .offline-tap-hint {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            color: rgba(255,255,255,.12);
-            user-select: none;
-            white-space: nowrap;
+        .offline-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #39FF14;
+            box-shadow: 0 0 8px #39FF14;
+        }
+
+        .offline-admin-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            background: transparent;
+            color: #39FF14;
+            border: 2px solid #39FF14;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 24px;
+            text-decoration: none;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+
+        .offline-admin-btn:hover {
+            background: #39FF14;
+            color: #050805;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
         }
 
         /* ── Security Lock Modal ── */
@@ -366,72 +327,52 @@
     <!-- Hidden by default; shown when isActive = false  -->
     <!-- ═══════════════════════════════════════════════ -->
     <div id="system-offline-screen">
-        <!-- Background -->
-        <div class="offline-bg-grid"></div>
-        <div class="offline-orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 70%);top:-80px;left:-120px;"></div>
-        <div class="offline-orb" style="width:320px;height:320px;background:radial-gradient(circle,rgba(239,68,68,.12),transparent 70%);bottom:-60px;right:-80px;"></div>
+        <!-- Matrix Rain Canvas -->
+        <canvas id="matrix-canvas-admin"></canvas>
 
         <!-- Content card -->
         <div class="offline-card">
-
-            <!-- Faint 404 behind everything -->
-            <div class="offline-error-code">404</div>
-
-            <!-- Animated icon -->
+            <!-- Alert icon -->
             <div class="offline-icon-wrap">
-                <div class="pulse-ring"></div>
-                <div class="pulse-ring"></div>
-
-                <!-- Secret: click logo 5× to show login -->
-                <div id="offline-logo-btn" class="main-icon" title="" onclick="handleOfflineTap()" style="cursor:default;">
-                    <!-- Orbiting dots -->
-                    <div class="offline-orbit-wrap">
-                        <div class="offline-orbit-dot" style="background:#818cf8;"></div>
-                        <div class="offline-orbit-dot" style="background:#6366f1;"></div>
-                        <div class="offline-orbit-dot" style="background:#ef4444;"></div>
-                    </div>
-                    <!-- Icon inside -->
-                    <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
+                ☠
             </div>
 
             <!-- Status badge -->
             <div class="offline-status-bar">
                 <div class="offline-dot"></div>
-                <div class="offline-dot"></div>
-                <div class="offline-dot"></div>
-                <span style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:.08em;text-transform:uppercase;">System Offline</span>
+                <span style="font-size:11px;font-weight:700;color:#39FF14;letter-spacing:.05em;text-transform:uppercase;text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);">SYSTEM CONTROL OVERRIDE</span>
             </div>
 
             <!-- Headline -->
-            <h1 style="font-size:clamp(22px,5vw,30px);font-weight:900;color:#fff;margin:0 0 12px;line-height:1.2;letter-spacing:-.5px;">
-                We'll be back soon
+            <h1 style="font-size:22px;font-weight:700;color:#39FF14;margin:0 0 8px;line-height:1.2;letter-spacing:-0.02em;text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);">
+                [ YOU HAVE BEEN HACKED! ]
             </h1>
 
             <!-- Sub text -->
-            <p style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;margin:0 0 32px;max-width:340px;margin-left:auto;margin-right:auto;">
-                The system is currently undergoing scheduled maintenance. We apologise for the inconvenience and will be online shortly.
+            <p style="font-size:13px;color:#88ff88;line-height:1.5;margin:0 0 20px;max-width:320px;margin-left:auto;margin-right:auto;">
+                The portal has been locked down by root security command. All administrative functions have been temporarily deactivated.
             </p>
 
+            <!-- Hacker Terminal -->
+            <div style="background:#000;border:1px solid #1a331a;padding:12px;border-radius:4px;text-align:left;font-size:12px;line-height:1.5;color:#39FF14;margin-bottom:16px;font-family:monospace;">
+                <div>root@control:~# STATUS: SYSTEM_DEACTIVATED</div>
+                <div>root@control:~# BYPASS_KEY: ENCRYPTED</div>
+                <div>root@control:~# PING: port_80_restricted</div>
+                <div class="hacker-prompt" style="display:inline-block;">root@control:~# </div>
+            </div>
+
             <!-- Info pills -->
-            <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
-                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);">Access Restricted</span>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:6px;background:rgba(57,255,20,0.05);border:1px solid rgba(57,255,20,0.3);border-radius:4px;padding:6px 12px;">
+                    <span style="font-size:11px;font-weight:500;color:#39FF14;text-shadow: 0 0 3px rgba(57, 255, 20, 0.4);">Access Restricted</span>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 18px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);" id="offline-fest-name">Kauthukam '26</span>
+                <div style="display:flex;align-items:center;gap:6px;background:rgba(57,255,20,0.05);border:1px solid rgba(57,255,20,0.3);border-radius:4px;padding:6px 12px;">
+                    <span style="font-size:11px;font-weight:500;color:#39FF14;text-shadow: 0 0 3px rgba(57, 255, 20, 0.4);" id="offline-fest-name">Kauthukam '26</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Tap hint (invisible by default) -->
-        <div class="offline-tap-hint" id="offline-tap-hint">·</div>
+
+        </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════ -->
@@ -606,15 +547,78 @@
         // SYSTEM STATUS + BIOMETRIC OWNER AUTH
         // ══════════════════════════════════════════════════════
 
+        let matrixRainInterval = null;
+
+        function startMatrixRain(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ☠⚡⚠☣🕷";
+            const charArray = characters.split("");
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for (let x = 0; x < columns; x++) {
+                drops[x] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(5, 8, 5, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#39FF14';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            if (matrixRainInterval) clearInterval(matrixRainInterval);
+            matrixRainInterval = setInterval(draw, 33);
+            
+            const resizeHandler = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resizeHandler);
+            canvas._resizeHandler = resizeHandler;
+        }
+
+        function stopMatrixRain(canvasId) {
+            if (matrixRainInterval) {
+                clearInterval(matrixRainInterval);
+                matrixRainInterval = null;
+            }
+            const canvas = document.getElementById(canvasId);
+            if (canvas && canvas._resizeHandler) {
+                window.removeEventListener('resize', canvas._resizeHandler);
+                canvas._resizeHandler = null;
+            }
+        }
+
         function showOfflineScreen(festName) {
             if (festName) document.getElementById('offline-fest-name').innerText = festName;
             document.getElementById('system-offline-screen').classList.add('show');
             document.getElementById('login-container').style.display = 'none';
+            setTimeout(() => startMatrixRain('matrix-canvas-admin'), 50);
         }
 
         function hideOfflineScreen() {
             document.getElementById('system-offline-screen').classList.remove('show');
             document.getElementById('login-container').style.display = '';
+            stopMatrixRain('matrix-canvas-admin');
         }
 
         // Handle "Remember Me" on page load
